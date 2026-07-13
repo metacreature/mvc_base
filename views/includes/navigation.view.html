@@ -1,0 +1,84 @@
+<?php
+/*
+ File: navigation.view.html
+ Copyright (c) 2025 Clemens K. (https://github.com/metacreature)
+ 
+ MIT License
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+*/
+?>
+<div id="header">
+    <a class="logo" href="<?php echo SETTINGS_LANDING_PAGE ?>">
+        <img src="/static/images/logo.png" alt="<?php echo LANG_NAVIGATION_HOME ?>">
+    </a>
+
+    <?php if (count(SETTINGS_AVAILABLE_LANG) > 1) { ?>
+        <div class="language">
+            <select id="select_language">
+                <?php 
+                foreach(array_intersect_key(LANGUAGE_LIST, array_flip(SETTINGS_AVAILABLE_LANG)) as $key => $value) {
+                    if (SELECTED_LANG == $key) {
+                        echo '<option value="' . $key . '" selected>'. $value . '</option>';
+                    } else {
+                        echo '<option value="' . $key . '">'. $value . '</option>';
+                    }
+                } 
+                ?>
+            </select>
+            <script>
+                $('#select_language').change(function(e){
+                    set_cookie('selected_lang', $(this).val(), 365);
+                    self.location.reload();
+                });
+                set_cookie('selected_lang', $('#select_language').val(), 365);
+            </script>
+        </div>
+    <?php } ?>
+
+    <?php if (Controller_Base::is_login()) { ?>
+
+        <a class="logout" href="/user/login/logout">
+            <img src="/static/images/icons/exit-outline.svg" alt="">
+            <span><?php echo LANG_NAVIGATION_LOGOUT; ?></span>
+        </a>
+        <a class="user_name" href="/user/profile">
+            <img src="/static/images/icons/person-circle-outline.svg" alt="">
+            <span><?php $name = Controller_Base::get_user_name(); echo xssProtect($name); ?></span>
+        </a>
+
+    <?php } else  { ?>
+
+        <a class="login" href="/user/login">
+            <img src="/static/images/icons/enter-outline.svg" alt="">
+            <span><?php echo LANG_NAVIGATION_LOGIN; ?></span>
+        </a>
+
+        
+        <?php if (SETTINGS_ALLOW_REGISTER) { ?>
+            <a class="register" href="/user/register">
+                <img src="/static/images/icons/enter-outline.svg" alt="">
+                <span><?php echo LANG_NAVIGATION_REGISTER; ?></span>
+            </a>
+        <?php } ?>
+
+    <?php } ?>
+
+    <div class="clear"></div>
+</div>

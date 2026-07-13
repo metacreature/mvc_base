@@ -1,0 +1,18 @@
+#AllowOverride All
+
+Options -Indexes
+RewriteEngine on
+
+ErrorDocument 403 /crawler.html
+
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "null"
+    Header set Server "null"
+</IfModule>
+
+RewriteBase /
+RewriteRule ^favicon.ico favicon.ico [L,QSA]
+RewriteRule ^robots.txt robots.txt [L,QSA]
+RewriteRule ^static/(.*)$ static/$1 [L,QSA]
+RewriteRule ^gallery/(.*)$ gallery/$1 [L,QSA]
+RewriteRule !^(favicon.ico) index.php [L,QSA]

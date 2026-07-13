@@ -1,0 +1,91 @@
+<?php
+/*
+ File: profile.view.html
+ Copyright (c) 2025 Clemens K. (https://github.com/metacreature)
+ 
+ MIT License
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+*/
+?>
+<?php require_once (DOCUMENT_ROOT . '/views/includes/header.view.html'); ?>
+<?php require_once (DOCUMENT_ROOT . '/views/includes/navigation.view.html'); ?>
+
+
+<div class="center_box_profile">
+    <div class="row">
+        <div class="hidden-xs col-md-4"></div>
+        <div class="col-xs-12 col-md-8 ">
+            <h3><?php echo LANG_PROFILE_DATA_HDL ?></h3>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <?php 
+    echo $profile_form->printStartTag();
+    echo $profile_form->printLine('user_name', LANG_FIELD_USER_USERNAME);
+    echo $profile_form->printSubmitLine(LANG_PROFILE_SAVE, 'save', '/user/profile/update_profile');
+    echo $profile_form->printEndTag();
+    ?>
+    <div class="row">
+        <div class="hidden-xs col-md-4"></div>
+        <div class="col-xs-12 col-md-8 ">
+            <h3><?php echo LANG_PROFILE_EMAIL_HDL ?></h3>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <?php 
+    echo $email_form->printStartTag();
+    echo $email_form->printLine('actual_password', LANG_FIELD_USER_ACTUAL_PASSWORD);
+    echo $email_form->printLine('email', LANG_FIELD_USER_EMAIL);
+    echo $email_form->printSubmitLine(LANG_PROFILE_SAVE, 'save', '/user/profile/update_email');
+    echo $email_form->printEndTag();
+    ?>
+    <div class="row">
+        <div class="hidden-xs col-md-4"></div>
+        <div class="col-xs-12 col-md-8 ">
+            <h3><?php echo LANG_PROFILE_PASSWORD_HDL ?></h3>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <?php 
+    echo $password_form->printStartTag();
+    echo $password_form->printLine('actual_password', LANG_FIELD_USER_ACTUAL_PASSWORD);
+    echo $password_form->printLine('password', LANG_FIELD_USER_PASSWORD);
+    echo $password_form->printLine('password_confirmation', LANG_FIELD_USER_REPEAT_PASSWORD);
+    echo $password_form->printButtonLine(LANG_GENEERATE_PASSWORD_BUTTON, 'generate_password');
+    echo $password_form->printSubmitLine(LANG_PROFILE_SAVE, 'save', '/user/profile/update_password');
+    echo $password_form->printEndTag();
+    ?>
+</div>
+
+
+<script>
+    $('.profile_form').ajax_form({
+        'default_error': LANG_FORM_DEFAULT_ERROR,
+        success: function(){
+            $('#header .user_name span').html($('.profile_form #user_name').val());
+        }
+    });
+    $('.email_form, .password_form').ajax_form({'default_error': LANG_FORM_DEFAULT_ERROR});
+    $('.generate_password').click(function() {
+        clickGenPassword('<?php echo LANG_GENEERATE_PASSWORD_POPUP_TITLE; ?>', '<?php echo LANG_GENEERATE_PASSWORD_POPUP_TEXT; ?>', '<?php echo LANG_GENEERATE_PASSWORD_POPUP_BUTTON; ?>');
+    });
+</script>
+
+<?php require_once (DOCUMENT_ROOT . '/views/includes/footer.view.html'); ?>

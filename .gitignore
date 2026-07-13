@@ -1,0 +1,6 @@
+/gallery/recipes/
+_settings.inc.php
+.buildpath
+.project
+/_logs/DBQueries.*
+/_logs/execution_time.*
