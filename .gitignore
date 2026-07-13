@@ -1,6 +1,6 @@
-/gallery/recipes/
-_settings.inc.php
+/.settings/
 .buildpath
 .project
 /_logs/DBQueries.*
 /_logs/execution_time.*
+/static/node_modules/*
