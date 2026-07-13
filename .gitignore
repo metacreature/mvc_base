@@ -4,3 +4,4 @@
 /_logs/DBQueries.*
 /_logs/execution_time.*
 /static/node_modules/*
+/static/package-lock.json
