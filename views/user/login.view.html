@@ -27,21 +27,22 @@
 <?php require_once (DOCUMENT_ROOT . '/views/includes/header.view.html'); ?>
 <?php require_once (DOCUMENT_ROOT . '/views/includes/navigation.view.html'); ?>
 
-<div class="center_box_login">
-    <div class="row">
-        <div class="hidden-xs col-md-4"></div>
-        <div class="col-xs-12 col-md-8 ">
-            <h3><?php echo LANG_LOGIN_HDL ?></h3>
+<div class="center_box_user">
+    <div class="row justify-content-end">
+        <div class="col-sm-8 ">
+            <h3><?php outT(LANG_LOGIN_HDL); ?></h3>
         </div>
         <div class="clear"></div>
     </div>
 				
     <?php 
+    $form->setColBehavior(4,8, 'sm');
     echo $form->printStartTag();
+    echo $form->printMsg();
     echo $form->printLine('email', LANG_FIELD_USER_EMAIL, ['autocomplete' => 'on']);
     echo $form->printLine('password', LANG_FIELD_USER_PASSWORD, ['autocomplete' => 'on']);
     if (SETTINGS_REMEMBER_LOGIN_ENABLED) {
-        echo $form->printCheckboxLine('remember_login', LANG_LOGIN_REMEMBER_LOGIN); 
+        //echo $form->printCheckboxLine('remember_login', LANG_LOGIN_REMEMBER_LOGIN); 
     }
     echo $form->printSubmitLine(LANG_LOGIN_SAVE, 'save', '/user/login/save');
     echo $form->printHTMLLine('<a href="/user/password/request">'.LANG_LOGIN_FORGOTTEN.'</a>');
@@ -55,7 +56,7 @@
         'default_error': LANG_FORM_DEFAULT_ERROR,
         'success': function(form, button, data) {
             if (data.success) {
-                top.location.replace('<?php echo !empty($_GET['target']) ? str_replace("'", "\\'", $_GET['target']) :  SETTINGS_LANDING_PAGE; ?>');
+                top.location.replace('<?php echo !empty($_GET['target']) ? str_replace("'", "\\'", $_GET['target']) :  '/'; ?>');
             }
         }
     });

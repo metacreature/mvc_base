@@ -32,7 +32,7 @@
     <div class="row">
         <div class="hidden-xs col-md-4"></div>
         <div class="col-xs-12 col-md-8 ">
-            <h3><?php echo LANG_REGISTER_HDL ?></h3>
+            <h3><?php outT(LANG_REGISTER_HDL); ?></h3>
         </div>
         <div class="clear"></div>
     </div>
@@ -62,7 +62,7 @@
     });
 
     $('.generate_password').click(function() {
-        clickGenPassword('<?php echo LANG_GENEERATE_PASSWORD_POPUP_TITLE; ?>', '<?php echo LANG_GENEERATE_PASSWORD_POPUP_TEXT; ?>', '<?php echo LANG_GENEERATE_PASSWORD_POPUP_BUTTON; ?>');
+        clickGenPassword('<?php outT(LANG_GENEERATE_PASSWORD_POPUP_TITLE); ?>', '<?php outT(LANG_GENEERATE_PASSWORD_POPUP_TEXT); ?>', '<?php outT(LANG_GENEERATE_PASSWORD_POPUP_BUTTON); ?>');
     });
 </script>
 

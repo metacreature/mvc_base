@@ -1,7 +1,18 @@
 <?php
 
-define('LANG_PAGE_TITLE', 'Metacreature\'s Reciepes');
+define('LANG_DUMMY', 'DUMMY');
+
+define('LANG_PAGE_TITLE', 'MVC Base');
 define('LANG_NAVIGATION_HOME', 'Home');
+define('LANG_NAVIGATION_MENU', 'MENU');
+define('LANG_NAVIGATION_LOGIN', 'login');
+define('LANG_NAVIGATION_LOGOUT', 'logout');
+define('LANG_NAVIGATION_REGISTER', 'register');
+define('LANG_NAVIGATION_LANGUAGE', 'Language: ');
+define('LANG_NAVIGATION_LAYOUT', 'Layout: ');
+define('LANG_NAVIGATION_LAYOUT_DARK', 'dark');
+define('LANG_NAVIGATION_LAYOUT_LIGHT', 'light');
+define('LANG_NAVIGATION_LAYOUT_AUTO', 'auto');
 
 define('LANG_FORMFIELD_ERRORS', array(
     'pattern' => 'Invalid value!',
@@ -26,10 +37,6 @@ define('LANG_GENEERATE_PASSWORD_BUTTON', 'Generate password');
 define('LANG_GENEERATE_PASSWORD_POPUP_TITLE', 'Generate password');
 define('LANG_GENEERATE_PASSWORD_POPUP_TEXT', 'The password was copied to your clipboard!');
 define('LANG_GENEERATE_PASSWORD_POPUP_BUTTON', 'OK');
-
-define('LANG_NAVIGATION_LOGIN', 'login');
-define('LANG_NAVIGATION_LOGOUT', 'logout');
-define('LANG_NAVIGATION_REGISTER', 'register');
 
 define('LANG_REGISTER_HDL', 'Registration');
 define('LANG_REGISTER_SAVE', 'register');

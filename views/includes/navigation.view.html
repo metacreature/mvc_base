@@ -24,61 +24,147 @@
  SOFTWARE.
 */
 ?>
-<div id="header">
-    <a class="logo" href="<?php echo SETTINGS_LANDING_PAGE ?>">
-        <img src="/static/images/logo.png" alt="<?php echo LANG_NAVIGATION_HOME ?>">
-    </a>
 
-    <?php if (count(SETTINGS_AVAILABLE_LANG) > 1) { ?>
-        <div class="language">
-            <select id="select_language">
-                <?php 
-                foreach(array_intersect_key(LANGUAGE_LIST, array_flip(SETTINGS_AVAILABLE_LANG)) as $key => $value) {
-                    if (SELECTED_LANG == $key) {
-                        echo '<option value="' . $key . '" selected>'. $value . '</option>';
-                    } else {
-                        echo '<option value="' . $key . '">'. $value . '</option>';
-                    }
-                } 
-                ?>
-            </select>
-            <script>
-                $('#select_language').change(function(e){
-                    set_cookie('selected_lang', $(this).val(), 365);
-                    self.location.reload();
-                });
-                set_cookie('selected_lang', $('#select_language').val(), 365);
-            </script>
-        </div>
-    <?php } ?>
+<nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+	<div class="container-fluid">
 
-    <?php if (Controller_Base::is_login()) { ?>
+		<a class="navbar-brand" href="/" title="<?php outT(LANG_NAVIGATION_HOME); ?>">
+			<img src="/static/images/logo.png" alt="">
+		</a>
 
-        <a class="logout" href="/user/login/logout">
-            <img src="/static/images/icons/exit-outline.svg" alt="">
-            <span><?php echo LANG_NAVIGATION_LOGOUT; ?></span>
-        </a>
-        <a class="user_name" href="/user/profile">
-            <img src="/static/images/icons/person-circle-outline.svg" alt="">
-            <span><?php $name = Controller_Base::get_user_name(); echo xssProtect($name); ?></span>
-        </a>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav">
+				<li class="nav-item d-none">
+					<a class="nav-link" href="/"><?php outT(LANG_NAVIGATION_HOME); ?></a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#"><?php outT(LANG_DUMMY); ?></a>
+				</li>
+			</ul>
+		</div>
 
-    <?php } else  { ?>
+		<ul class="navbar-nav justify-content-end navbar-fixed">
 
-        <a class="login" href="/user/login">
-            <img src="/static/images/icons/enter-outline.svg" alt="">
-            <span><?php echo LANG_NAVIGATION_LOGIN; ?></span>
-        </a>
+<?php 
+	if (Controller_Base::is_login()) { 
+?>
+			<li class="nav-item">
+				<a class="nav-link icon-link" href="/user/profile" title="<?php outT(Controller_Base::get_user_name()); ?>">
+					<svg class="bi">
+						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#person-circle"></use>
+					</svg>
+					<span><?php outT(Controller_Base::get_user_name()); ?></span>
+				</a>
+			</li>
+			
+			<li class="nav-item">
+				<a class="nav-link icon-link" href="/user/login/logout" title="<?php outT(LANG_NAVIGATION_LOGOUT); ?>">
+					<svg class="bi">
+						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#box-arrow-left"></use>
+					</svg>
+					<span><?php outT(LANG_NAVIGATION_LOGOUT); ?></span>
+				</a>
+			</li>
 
-        
-        <?php if (SETTINGS_ALLOW_REGISTER) { ?>
-            <a class="register" href="/user/register">
-                <img src="/static/images/icons/enter-outline.svg" alt="">
-                <span><?php echo LANG_NAVIGATION_REGISTER; ?></span>
-            </a>
-        <?php } ?>
+<?php 
+	} else  { 
+		if (SETTINGS_ALLOW_REGISTER) { 
+?>
+			<li class="nav-item">
+				<a class="nav-link icon-link" href="/user/register" title="<?php outT(LANG_NAVIGATION_REGISTER); ?>">
+					<svg class="bi">
+						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#person-plus"></use>
+					</svg>
+					<span><?php outT(LANG_NAVIGATION_REGISTER); ?></span>
+				</a>
+			</li>
 
-    <?php } ?>
+<?php
+		} 
+?>
+			<li class="nav-item">
+				<a class="nav-link icon-link" href="/user/login" title="<?php outT(LANG_NAVIGATION_LOGIN); ?>">
+					<svg class="bi">
+						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#box-arrow-right"></use>
+					</svg>
+					<span><?php outT(LANG_NAVIGATION_LOGIN); ?></span>
+				</a>
+			</li>
 
-    <div class="clear"></div>
-</div>
+<?php
+	} 
+?>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" title="<?php outT(LANG_NAVIGATION_LANGUAGE.LANGUAGE_LIST[SELECTED_LANG]) ?>" aria-expanded="false">
+						<img src="/static/node_modules/language-icons/icons/<?php outT(SELECTED_LANG); ?>.svg" alt="" aria-hidden="true">
+				</a>
+				<ul class="dropdown-menu dropdown-menu-end" id="select_language">
+
+<?php 
+	foreach(array_intersect_key(LANGUAGE_LIST, array_flip(SETTINGS_AVAILABLE_LANG)) as $key => $value) {
+		if (SELECTED_LANG == $key) {
+?>
+					<li>
+						<button type="button" class="dropdown-item icon-link" data-language="<?php outT($key); ?>" aria-pressed="true">
+							<img src="/static/node_modules/language-icons/icons/<?php outT($key); ?>.svg" alt="" aria-hidden="true">
+							<span><?php outT($value); ?></span>
+							<svg class="bi"><use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#check2"></use></svg>
+						</button>
+					</li>
+
+<?php   
+		} else { 
+?>
+					<li>
+						<button type="button" class="dropdown-item icon-link" data-language="<?php outT($key); ?>" aria-pressed="false">
+							<img src="/static/node_modules/language-icons/icons/<?php outT($key); ?>.svg" alt="">
+							<span><?php outT($value); ?></span>
+						</button>
+					</li>
+
+<?php 
+		}
+	} 
+?>
+				</ul>
+			</li>
+			<li class="nav-item dropdown" id="select_theme">
+				<button class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="bd-theme" title="<?php outT(LANG_NAVIGATION_LAYOUT); ?>">
+					<svg class="bi theme-icon-active"><use href=""></use></svg>
+				</button>
+				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
+				<li>
+					<button type="button" class="dropdown-item icon-link" data-bs-theme-value="light" aria-pressed="false">
+						<svg class="bi theme-icon"><use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#sun-fill"></use></svg>
+						<span><?php outT(LANG_NAVIGATION_LAYOUT_LIGHT); ?></span>
+					</button>
+				</li>
+				<li>
+					<button type="button" class="dropdown-item icon-link" data-bs-theme-value="dark" aria-pressed="false">
+						<svg class="bi theme-icon"><use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#moon-stars-fill"></use></svg>
+						<span><?php outT(LANG_NAVIGATION_LAYOUT_DARK); ?></span>
+					</button>
+				</li>
+				<li>
+					<button type="button" class="dropdown-item icon-link" data-bs-theme-value="auto" aria-pressed="false">
+						<svg class="bi theme-icon"><use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#circle-half"></use></svg>
+						<span><?php outT(LANG_NAVIGATION_LAYOUT_AUTO); ?></span>
+					</button>
+				</li>
+				</ul>
+			</li>
+			<li>
+				<button class="navbar-menue justify-content-end" title="<?php outT(LANG_NAVIGATION_MENU); ?>" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<svg class="bi theme-icon"><use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#list"></use></svg>
+				</button>
+			</li>
+		</ul>
+	</div>
+</nav>
+<script>
+	$('#select_language button').click(function(e){
+		set_cookie('selected_lang', $(this).data('language'), 365);
+		self.location.reload();
+	});
+	set_cookie('selected_lang', $('#select_language button[aria-pressed="true"]').val(), 365);
+</script>

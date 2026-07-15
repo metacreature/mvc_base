@@ -32,6 +32,28 @@ define('FORMAT_DATE', 'd.m.Y');
 define('FORMAT_TIME', 'H:i:s');
 define('FORMAT_DATETIME', 'd.m.Y H:i:s');
 
+
+// xxsProtect
+function outT($sString) {
+    if (!is_null($sString)) {
+        echo htmlspecialchars($sString, ENT_COMPAT, 'UTF-8');
+    }
+}
+
+function outHtml($sString) {
+    if (!is_null($sString)) {
+        echo $sString;
+    }
+}
+
+function xssProtect($sString)
+{
+    if (is_null($sString)) {
+        return '';
+    }
+    return htmlspecialchars($sString, ENT_COMPAT, 'UTF-8');
+}
+
 // session functions
 function my_session_start()
 {
@@ -124,14 +146,6 @@ function cloneObj($oObj)
 function mb_trim(&$sString)
 {
     return trim($sString == null ? '' : $sString);
-}
-
-function xssProtect(&$sString)
-{
-    if (is_null($sString)) {
-        return '';
-    }
-    return htmlspecialchars($sString, ENT_COMPAT, 'UTF-8');
 }
 
 function preint_r($mValue)

@@ -1,6 +1,18 @@
 <?php
-define('LANG_PAGE_TITLE', 'Metacreature\'s Rezepte');
+
+define('LANG_DUMMY', 'DUMMY');
+
+define('LANG_PAGE_TITLE', 'MVC Base');
 define('LANG_NAVIGATION_HOME', 'Home');
+define('LANG_NAVIGATION_MENU', 'MENÜ');
+define('LANG_NAVIGATION_LOGIN', 'login');
+define('LANG_NAVIGATION_LOGOUT', 'logout');
+define('LANG_NAVIGATION_REGISTER', 'registrieren');
+define('LANG_NAVIGATION_LANGUAGE', 'Sprache: ');
+define('LANG_NAVIGATION_LAYOUT', 'Layout: ');
+define('LANG_NAVIGATION_LAYOUT_DARK', 'dunkel');
+define('LANG_NAVIGATION_LAYOUT_LIGHT', 'hell');
+define('LANG_NAVIGATION_LAYOUT_AUTO', 'auto');
 
 define('LANG_FORMFIELD_ERRORS', array(
     'pattern' => 'Eingabe ungültig!',
@@ -25,10 +37,6 @@ define('LANG_GENEERATE_PASSWORD_BUTTON', 'Passwort generieren');
 define('LANG_GENEERATE_PASSWORD_POPUP_TITLE', 'Passwort generieren');
 define('LANG_GENEERATE_PASSWORD_POPUP_TEXT', 'Das Passwort wurde in die Zwischenablage kopiert!');
 define('LANG_GENEERATE_PASSWORD_POPUP_BUTTON', 'OK');
-
-define('LANG_NAVIGATION_LOGIN', 'login');
-define('LANG_NAVIGATION_LOGOUT', 'logout');
-define('LANG_NAVIGATION_REGISTER', 'registrieren');
 
 define('LANG_REGISTER_HDL', 'Registrieren');
 define('LANG_REGISTER_SAVE', 'Registrieren');

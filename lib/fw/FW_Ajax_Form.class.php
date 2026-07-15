@@ -39,8 +39,9 @@ class FW_Ajax_Form
     
     protected $_secure_time;
 
-    protected $_col_md_label = 4;
-    protected $_col_md_field = 8;
+    protected $_col_behavior_label = 4;
+    protected $_col_behavior_field = 8;
+    protected $_col_behavior_break = 'md';
 
     function __construct($form_name, $activate_secure = false, $secure_time = 0) 
     {
@@ -65,9 +66,10 @@ class FW_Ajax_Form
         return $oField;
     }
 
-    function setColMd($iLabel, $iField) {
-        $this->_col_md_label = (string) $iLabel;
-        $this->_col_md_field = (string) $iField;
+    function setColBehavior($iLabel, $iField, $sBreak = 'md') {
+        $this->_col_behavior_label = (string) $iLabel;
+        $this->_col_behavior_field = (string) $iField;
+        $this->_col_behavior_break = $sBreak;
     }
 
     function setFieldErrors($arrFieldErrors, $mTypes = null)
@@ -222,7 +224,7 @@ class FW_Ajax_Form
         return array_merge(array('error' => true, 'field_errors' => $arrFieldErrors, 'message' => $sMessage), $arr);
     }
 
-    function printStartTag($bIncludeResponse = true)
+    function printStartTag()
     {
         $sReturn = '';
         $sEncType = '';
@@ -245,11 +247,19 @@ class FW_Ajax_Form
         
         return '
 
-    <form method="post" ' . $sEncType . ' autocomplete="off" class="ajax-form form-horizontal col-md-'.
-        $this->_col_md_label.'-'.$this->_col_md_field.' ' . $this->_form_name . '" data-name="'.$this->_form_name.'">
-        '.($this->_activate_secure ? '<input type="hidden" name="secure" value="' . $secure . '">' : '').
-        $sReturn. ($bIncludeResponse ? '
-        <div class="ajax-form-response"></div>' : '');
+    <form method="post" ' . $sEncType . ' autocomplete="off" class="ajax-form form-horizontal break-'.$this->_col_behavior_break.
+        ' ' . $this->_form_name . '" data-name="'.$this->_form_name.'">'.($this->_activate_secure ? '
+        <input type="hidden" name="secure" value="' . $secure . '">' : '').
+        $sReturn;
+    }
+
+    function printMsg() {
+        return '
+        <div class="row form-group ajax-form-response-line justify-content-end">
+            <div class="field-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
+                <div class="ajax-form-response"></div>
+            </div>
+        </div>';
     }
 
     function printEndTag()
@@ -295,7 +305,7 @@ class FW_Ajax_Form
             return null;
         } 
 
-        $sClassName = 'field-line form-group row ';
+        $sClassName = 'field-line form-group row mb-3 justify-content-end ';
         $sClassName .= $this->getLineClassName($sFieldName);
         $sClassName .= $sLineClassNames ? ' ' . $sLineClassNames : '';
 
@@ -307,11 +317,10 @@ class FW_Ajax_Form
 
         return '
         <div class="' . mb_trim($sClassName) . '">
-            <label class="col-xs-12 col-md-'.$this->_col_md_label.' control-label" for="' . $sFieldName . '" aria-label-for="' . $sFieldName . '">' . $sLabel . '</label>
-            <div class="field-wrapper col-xs-12 col-md-'.$this->_col_md_field.'">
+            <label class="col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_label.' control-label" for="' . $sFieldName . '" aria-label-for="' . $sFieldName . '">' . $sLabel . '</label>
+            <div class="field-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
                 ' . $this->printInput($sFieldName, $arrFieldAttributes) . '
             </div>
-            <div class="clear"></div>
         </div>';
     }
 
@@ -322,7 +331,7 @@ class FW_Ajax_Form
             return null;
         } 
 
-        $sClassName = 'field-line form-group row ';
+        $sClassName = 'field-line form-group row mb-3 justify-content-end ';
         $sClassName .= $this->getLineClassName($sFieldName);
         $sClassName .= $sLineClassNames ? ' ' . $sLineClassNames : '';
 
@@ -330,28 +339,24 @@ class FW_Ajax_Form
 
         return '
         <div class="' . mb_trim($sClassName) . '">
-            <div class="control-label col-md-' . $this->_col_md_label . ' hidden-xs hidden-sm">&nbsp;</div>
-            <div class="field-wrapper col-xs-12 col-md-'.$this->_col_md_field.'">
+            <div class="field-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
                 ' . $this->printInput($sFieldName, $arrFieldAttributes) . '
                 <label class="control-label" for="' . $sFieldName . '" aria-label-for="' . $sFieldName . '">' . $sLabel . '</label>
             </div>
-            <div class="clear"></div>
         </div>';
     }
 
     function printSubmitLine($sDisplayValue, $sClassName = null, $sEndpoint = null, $sLineClassNames = '')
     {
         if (! $this->_bFormDisabled) {
-            $sLineClassName = 'button-line form-group row';
-            $sLineClassName .= $sLineClassNames ? ' ' . $sLineClassNames : '';
+            $sLineClassName = 'button-line form-group row mb-3 justify-content-end ';
+            $sLineClassName .= $sLineClassNames ? $sLineClassNames : '';
 
             return '
         <div class="' . mb_trim($sLineClassName) . '">
-            <div class="control-label col-md-' . $this->_col_md_label . ' hidden-xs hidden-sm">&nbsp;</div>
-            <div class="button-wrapper col-xs-12 col-md-'.$this->_col_md_field.'">
+            <div class="button-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
                 ' . $this->printSubmit($sDisplayValue, $sClassName, $sEndpoint) . '
             </div>
-            <div class="clear"></div>
         </div>';
         }
         return '';
@@ -359,21 +364,19 @@ class FW_Ajax_Form
 
     function printSubmit($sDisplayValue, $sClassName = null, $sEndpoint = null)
     {
-        return '<a href="#" '.($sEndpoint ? 'data-endpoint="' .$sEndpoint  . '"' : '').' class="btn btn-ajax-submit' . ($sClassName ? ' ' . $sClassName : ''). '"><span>' . $sDisplayValue . '</span></a>';
+        return '<a href="#" '.($sEndpoint ? 'data-endpoint="' .$sEndpoint  . '"' : '').' class="btn btn-primary btn-ajax-submit' . ($sClassName ? ' ' . $sClassName : ''). '"><span>' . $sDisplayValue . '</span></a>';
     }
 
     function printButtonLine($sDisplayValue, $sClassName = null, $sLineClassNames = '')
     {
-        $sLineClassName = 'button-line form-group row';
-        $sLineClassName .= $sLineClassNames ? ' ' . $sLineClassNames : '';
+        $sLineClassName = 'button-line form-group row mb-3 justify-content-end ';
+        $sLineClassName .= $sLineClassNames ? $sLineClassNames : '';
 
         return '
         <div class="' . mb_trim($sLineClassName) . '">
-            <div class="control-label col-md-' . $this->_col_md_label . ' hidden-xs hidden-sm">&nbsp;</div>
-            <div class="button-wrapper col-xs-12 col-md-'.$this->_col_md_field.'">
+            <div class="button-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
                 ' . $this->printButton($sDisplayValue, $sClassName) . '
             </div>
-            <div class="clear"></div>
         </div>';
         
     }
@@ -385,14 +388,12 @@ class FW_Ajax_Form
 
     function printHTMLLine($sHTML = '&nbsp;', $sLineClassNames = '')
     {
-        $sClassName = 'html-line form-group row';
-        $sClassName .= $sLineClassNames ? ' ' . $sLineClassNames : '';
+        $sClassName = 'html-line form-group row mb-3 justify-content-end ';
+        $sClassName .= $sLineClassNames ? $sLineClassNames : '';
 
         return '
         <div class="' . mb_trim($sClassName) . '">
-            <div class="col-xs-12 col-md-'.$this->_col_md_label.' control-label">&nbsp;</div>
-            <div class="col-xs-12 col-md-'.$this->_col_md_field.'">' . $sHTML . '</div>
-            <div class="clear"></div>
+            <div class="col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">' . $sHTML . '</div>
         </div>';
     }
 }

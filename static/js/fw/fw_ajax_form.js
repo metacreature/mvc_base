@@ -138,6 +138,7 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 	
 	form.find(".ajax-form-response").hide().html("");
 	form.find(".field-error-msg").remove();
+	form.find(".field-error-msg-spacer").remove();
 	form.find('.line-error').removeClass('line-error');
 	form.find('.field-error').removeClass('field-error');
 	
@@ -156,7 +157,7 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 		}
 		form.find(".field-error").remove();
 		form.find(".field-line").removeClass('line-error');
-		form.find(".ajax-form-response").html('<span class="ajax-form-error">'+error_message+'</span>').show();
+		form.find(".ajax-form-response").html('<div class="ajax-form-error alert alert-danger">'+error_message+'</div>').show();
 		button.removeClass("btn-loading");
 		
 	} else if (data.success && data.redirect_url) {
@@ -172,7 +173,7 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 			settings.success(form, button, data);
 		}
 		if(data.message) {
-			form.find(".ajax-form-response").html('<span class="ajax-form-success">'+data.message+'</span>').show();
+			form.find(".ajax-form-response").html('<div class="ajax-form-success alert alert-success">'+data.message+'</div>').show();
 			ajax_form_scrolltop();
 		}
 		form.find(".ajax-form-success-hide").hide();
@@ -181,7 +182,7 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 			settings.warning(form, button, data);
 		}
 		if(data.message) {
-			form.find(".ajax-form-response").html('<span class="ajax-form-warning">'+data.message+'</span>').show();
+			form.find(".ajax-form-response").html('<div class="ajax-form-warning alert alert-warning">'+data.message+'</div>').show();
 			ajax_form_scrolltop();
 		}
 		form.find(".ajax-form-warning-hide").hide();
@@ -199,15 +200,16 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 				}
 				field.addClass("field-error").closest(".field-line").addClass("line-error");
 				if (error_list[i] !== true) {
+					line_class = field.closest(".field-wrapper").attr('class').match(/col-[a-z]+-[0-9]+/);
 					error = typeof error_list[i] == 'string' ? error_list[i] : error_list[i][0]
-					field.closest(".field-line").prepend('<span class="field-error-msg">'+error+'</span>');
+					field.closest(".field-line").prepend('<span class="field-error-msg '+line_class+'">'+error+'</span><div class="field-error-msg-spacer"></div>');
 				}
 			}
 			field = form.find('.line-error [name]');
 			field.first().focus();
 		}
 		if (data.message) {
-			form.find(".ajax-form-response").html('<span class="ajax-form-error">'+data.message+'</span>').show();
+			form.find(".ajax-form-response").html('<div class="ajax-form-error alert alert-danger">'+data.message+'</div>').show();
 			if (!field || field.length == 0) {
 				ajax_form_scrolltop();
 			}

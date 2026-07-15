@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
     "crypto-js": "^4.2.0",
-    "jquery": "^4.0.0"
+    "jquery": "^4.0.0",
+    "language-icons": "^0.3.0"
   }
 }
