@@ -1,7 +1,9 @@
-/.settings/
 .buildpath
 .project
-/_logs/DBQueries.*
-/_logs/execution_time.*
+/.settings/
+/.vscode/
+/_logs/
 /static/node_modules/*
 /static/package-lock.json
+/lib/vendor/*
+/lib/composer.lock

@@ -45,6 +45,11 @@ function outHtml($sString) {
         echo $sString;
     }
 }
+function outLink($sString) {
+    if (!is_null($sString)) {
+        echo str_replace('&amp;', '&', htmlspecialchars($sString, ENT_COMPAT, 'UTF-8'));
+    }
+}
 
 function xssProtect($sString)
 {
@@ -143,7 +148,7 @@ function cloneObj($oObj)
     return $oObj;
 }
 
-function mb_trim(&$sString)
+function mb_trim($sString)
 {
     return trim($sString == null ? '' : $sString);
 }

@@ -28,8 +28,6 @@
 require_once (DOCUMENT_ROOT . '/lib/base.cont.php');
 require_once (DOCUMENT_ROOT . '/models/user.model.php');
 
-require_once(DOCUMENT_ROOT . '/lib/external_libs/phpmailer/src/Exception.php');
-require_once(DOCUMENT_ROOT . '/lib/external_libs/phpmailer/src/PHPMailer.php');
 
 class Controller_User_Password extends Controller_Base
 {
@@ -66,8 +64,7 @@ class Controller_User_Password extends Controller_Base
             return $form->getFormError(LANG_FORM_INVALID);
         }
 
-        sleep(rand(1, 5));
-        usleep(rand(0, 900000));
+        usleep(rand(2154755, 6367810));
 
         $user_obj = new Model_User($this->_db, 0);
         $res = $user_obj->forgotten_change($form->getValue('token'), $form->getValue('password'));
@@ -88,8 +85,7 @@ class Controller_User_Password extends Controller_Base
         $form = $this->_get_forgotten_form();
         $form->resolveRequest();
 
-        sleep(rand(1, 5));
-        usleep(rand(0, 900000));
+        usleep(rand(2154755, 6367810));
 
         if ($form->validate($form)) {
             $user_obj = new Model_User($this->_db, 0);

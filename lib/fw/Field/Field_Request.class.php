@@ -28,7 +28,7 @@ require_once 'Field_Select.class.php';
 
 class Field_Request extends Field_Select
 {
-    function printInput($arrAttributes = null, $bFormDisabled = false)
+    function returnInput($arrAttributes = null, $bFormDisabled = false)
     {
         return '';
     }

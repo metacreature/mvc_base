@@ -40,7 +40,7 @@ class Field_Hidden extends Field_Base
         return $this->_checkError();
     }
 
-    function printInput($arrAttributes = null, $bFormDisabled = false)
+    function returnInput($arrAttributes = null, $bFormDisabled = false)
     {
         return '<input type="hidden" id="' . $this->_sName . '" name="' . $this->_sName . '" value="' . xssProtect($this->_mValue) . '">';
     }

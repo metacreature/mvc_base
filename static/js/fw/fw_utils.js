@@ -74,6 +74,10 @@ var is_empty = function(mixedVar, zero_is_not_empty) {
 	return false;
 }
 
+var trim = function(sString) {
+	return sString.trim();
+}
+
 var randInt = function (min, max) 
 {
   min = Math.ceil(min);

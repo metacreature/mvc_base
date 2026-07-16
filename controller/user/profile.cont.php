@@ -2,19 +2,19 @@
 /*
  File: profile.cont.php
  Copyright (c) 2025 Clemens K. (https://github.com/metacreature)
- 
+
  MIT License
- 
+
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in all
  copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -80,10 +80,10 @@ class Controller_User_Profile extends Controller_Base
             if ($res) {
                 $_SESSION['user_name'] = $form->getValue('user_name');
                 return $form->getFormSuccess(LANG_PROFILE_SUCCESS);
-            } 
+            }
             return $form->getFormError(LANG_PROFILE_DATA_FAIL);
-        } 
-        return $form->getFormError(LANG_FORM_INVALID); 
+        }
+        return $form->getFormError(LANG_FORM_INVALID);
     }
 
     function update_email() {
@@ -96,10 +96,10 @@ class Controller_User_Profile extends Controller_Base
                 $form->getValue('email'));
             if ($res) {
                 return $form->getFormSuccess(LANG_PROFILE_SUCCESS);
-            } 
+            }
             return $form->getFormError(LANG_PROFILE_EMAIL_FAIL);
-        } 
-        return $form->getFormError(LANG_FORM_INVALID); 
+        }
+        return $form->getFormError(LANG_FORM_INVALID);
     }
 
     function update_password() {
@@ -112,9 +112,9 @@ class Controller_User_Profile extends Controller_Base
                 $form->getValue('password'));
             if ($res) {
                 return $form->getFormSuccess(LANG_PROFILE_SUCCESS);
-            } 
+            }
             return $form->getFormError(LANG_PROFILE_PASSWORD_FAIL);
-        } 
-        return $form->getFormError(LANG_FORM_INVALID); 
+        }
+        return $form->getFormError(LANG_FORM_INVALID);
     }
 }

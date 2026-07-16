@@ -45,4 +45,13 @@ class Field_Password extends Field_Text
 
         return array_merge($_arrAttributes, $arrAttributes);
     }
+
+    function returnInput($arrAttributes = null, $bFormDisabled = false)
+    {
+        return '<div class="input-group">'.
+                parent::returnInput($arrAttributes, $bFormDisabled). 
+                '<div class="input-group-text"><svg class="bi"><use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#eye-slash"></use></svg></div>'.
+                '</div>';
+    }
+    
 }

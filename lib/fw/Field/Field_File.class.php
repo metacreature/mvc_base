@@ -270,7 +270,7 @@ class Field_File extends Field_Base
         return array_merge($_arrAttributes, $arrAttributes);
     }
 
-    function printInput($arrAttributes = null, $bFormDisabled = false)
+    function returnInput($arrAttributes = null, $bFormDisabled = false)
     {
         $arrAttributes = $this->_getAttributes($arrAttributes, $bFormDisabled);
 

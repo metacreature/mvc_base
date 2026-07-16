@@ -60,7 +60,7 @@
 			<li class="nav-item">
 				<a class="nav-link icon-link" href="/user/login/logout" title="<?php outT(LANG_NAVIGATION_LOGOUT); ?>">
 					<svg class="bi">
-						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#box-arrow-left"></use>
+						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#box-arrow-right"></use>
 					</svg>
 					<span><?php outT(LANG_NAVIGATION_LOGOUT); ?></span>
 				</a>
@@ -85,7 +85,7 @@
 			<li class="nav-item">
 				<a class="nav-link icon-link" href="/user/login" title="<?php outT(LANG_NAVIGATION_LOGIN); ?>">
 					<svg class="bi">
-						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#box-arrow-right"></use>
+						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#person"></use>
 					</svg>
 					<span><?php outT(LANG_NAVIGATION_LOGIN); ?></span>
 				</a>
@@ -166,5 +166,5 @@
 		set_cookie('selected_lang', $(this).data('language'), 365);
 		self.location.reload();
 	});
-	set_cookie('selected_lang', $('#select_language button[aria-pressed="true"]').val(), 365);
+	set_cookie('selected_lang', $('#select_language button[aria-pressed="true"]').data('language'), 365);
 </script>

@@ -143,8 +143,10 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 	form.find('.field-error').removeClass('field-error');
 	
 	var ajax_form_scrolltop = function() {
-		var top = form.find(".ajax-form-response").offset().top;
-		$(document).scrollTop(top-30);
+		var top = form.find(".ajax-form-response").offset().top - 90;
+		if ($(document).scrollTop() > top) {
+			$(document).scrollTop(top);
+		};
 	}
 	
 	if (typeof data !== 'object' || is_empty(data)) {
@@ -197,6 +199,9 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 				field = form.find('[name="' + i + '"]').first();
 				if (!field.attr('name')) {
 					field = form.find('[name="' + i + '[]"]').first();
+				}
+				if (field.attr('type') == 'hidden') {
+					continue;
 				}
 				field.addClass("field-error").closest(".field-line").addClass("line-error");
 				if (error_list[i] !== true) {

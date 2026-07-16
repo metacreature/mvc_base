@@ -67,9 +67,9 @@ class FW_Ajax_Form
     }
 
     function setColBehavior($iLabel, $iField, $sBreak = 'md') {
-        $this->_col_behavior_label = (string) $iLabel;
-        $this->_col_behavior_field = (string) $iField;
-        $this->_col_behavior_break = $sBreak;
+        $this->_col_behavior_label = intval($iLabel);
+        $this->_col_behavior_field = intval($iField);
+        $this->_col_behavior_break = preg_replace('#[^a-z]#', '', $sBreak);
     }
 
     function setFieldErrors($arrFieldErrors, $mTypes = null)
@@ -82,6 +82,7 @@ class FW_Ajax_Form
         if (! $mTypes) {
             $this->_arrFieldErrors = array_merge($this->_arrFieldErrors, $arrFieldErrors);
         }
+        
         foreach ($this->_arrFormFields as $oField) {
             if (! $mTypes || in_array($oField->getType(), $mTypes)) {
                 $oField->setFieldErrors($arrFieldErrors);
@@ -224,14 +225,14 @@ class FW_Ajax_Form
         return array_merge(array('error' => true, 'field_errors' => $arrFieldErrors, 'message' => $sMessage), $arr);
     }
 
-    function printStartTag()
+    function returnStartTag()
     {
         $sReturn = '';
         $sEncType = '';
         foreach ($this->_arrFormFields as $oField) {
             if ($oField instanceof Field_Hidden) {
                 $sReturn .= '
-        '.$oField->printInput();
+        '.$oField->returnInput();
             } else if ($oField instanceof Field_File) {
                 $sEncType = ' enctype="multipart/form-data" ';
             }
@@ -253,7 +254,7 @@ class FW_Ajax_Form
         $sReturn;
     }
 
-    function printMsg() {
+    function returnMsg() {
         return '
         <div class="row form-group ajax-form-response-line justify-content-end">
             <div class="field-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
@@ -262,7 +263,7 @@ class FW_Ajax_Form
         </div>';
     }
 
-    function printEndTag()
+    function returnEndTag()
     {
         return '
 	</form>
@@ -271,13 +272,13 @@ class FW_Ajax_Form
     }
 
 
-    function printInput($sFieldName, $arrFieldAttributes = null)
+    function returnInput($sFieldName, $arrFieldAttributes = null)
     {
         $oField = $this->getField($sFieldName);
         if (!$oField) {
             return null;
         }
-        return $oField->printInput($arrFieldAttributes, $this->_bFormDisabled);
+        return $oField->returnInput($arrFieldAttributes, $this->_bFormDisabled);
     }
 
     function getLineClassName($sFieldName)
@@ -292,13 +293,13 @@ class FW_Ajax_Form
             $sClassName .= ' line-disabled';
         } else {
             if ($oField->getMandatory()) {
-                $sClassName .= 'line-mandatory';
+                $sClassName .= ' line-mandatory';
             }
         }
         return mb_trim($sClassName);
     }
 
-    function printLine($sFieldName, $sLabel, $arrFieldAttributes = null, $sLineClassNames = '')
+    function returnLine($sFieldName, $sLabel, $arrFieldAttributes = null, $sLineClassNames = '')
     {
         $oField = $this->getField($sFieldName);
         if (!$oField || $oField->getType() == 'Hidden') {
@@ -306,25 +307,27 @@ class FW_Ajax_Form
         } 
 
         $sClassName = 'field-line form-group row mb-3 justify-content-end ';
+        $sClassName .= 'line-'.strtolower($oField->getType()) . ' ';
         $sClassName .= $this->getLineClassName($sFieldName);
         $sClassName .= $sLineClassNames ? ' ' . $sLineClassNames : '';
 
         if ($sLabel) {
             $sLabel .= $sLabel && $oField->getMandatory() ? ' *' : '';
         } else {
-            $sLabel = '&nbsp;';
+            $sLabel = ' ';
         }
 
         return '
-        <div class="' . mb_trim($sClassName) . '">
-            <label class="col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_label.' control-label" for="' . $sFieldName . '" aria-label-for="' . $sFieldName . '">' . $sLabel . '</label>
+        <div class="' . mb_trim(xssProtect($sClassName)) . '">
+            <label class="col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_label.' control-label" for="' . 
+            $sFieldName . '" aria-label-for="' . $sFieldName . '">' . xssProtect($sLabel) . '</label>
             <div class="field-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
-                ' . $this->printInput($sFieldName, $arrFieldAttributes) . '
+                ' . $this->returnInput($sFieldName, $arrFieldAttributes) . '
             </div>
         </div>';
     }
 
-    function printCheckboxLine($sFieldName, $sLabel, $arrFieldAttributes = null, $sLineClassNames = '')
+    function returnCheckboxLine($sFieldName, $sLabel, $arrFieldAttributes = null, $sLineClassNames = '')
     {
         $oField = $this->getField($sFieldName);
         if (!$oField || $oField->getType() != 'Checkbox') {
@@ -335,65 +338,111 @@ class FW_Ajax_Form
         $sClassName .= $this->getLineClassName($sFieldName);
         $sClassName .= $sLineClassNames ? ' ' . $sLineClassNames : '';
 
-        $sLabel .= $sLabel && $oField->getMandatory() ? ' *' : '';
+        $sLabel .= $sLabel && $oField->getMandatory() ? ' *' : ' ';
 
         return '
-        <div class="' . mb_trim($sClassName) . '">
+        <div class="' . mb_trim(xssProtect($sClassName)) . '">
             <div class="field-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
-                ' . $this->printInput($sFieldName, $arrFieldAttributes) . '
-                <label class="control-label" for="' . $sFieldName . '" aria-label-for="' . $sFieldName . '">' . $sLabel . '</label>
+                ' . $this->returnInput($sFieldName, $arrFieldAttributes) . '
+                <label class="control-label" for="' . $sFieldName . '" aria-label-for="' . $sFieldName . '">' . xssProtect($sLabel) . '</label>
             </div>
         </div>';
     }
 
-    function printSubmitLine($sDisplayValue, $sClassName = null, $sEndpoint = null, $sLineClassNames = '')
+    function returnSubmitLine($sDisplayValue, $sClassName = null, $sEndpoint = null, $sLineClassNames = '')
     {
         if (! $this->_bFormDisabled) {
             $sLineClassName = 'button-line form-group row mb-3 justify-content-end ';
             $sLineClassName .= $sLineClassNames ? $sLineClassNames : '';
 
             return '
-        <div class="' . mb_trim($sLineClassName) . '">
+        <div class="' . mb_trim(xssProtect($sLineClassName)) . '">
             <div class="button-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
-                ' . $this->printSubmit($sDisplayValue, $sClassName, $sEndpoint) . '
+                ' . $this->returnSubmit($sDisplayValue, $sClassName, $sEndpoint) . '
             </div>
         </div>';
         }
         return '';
     }
 
-    function printSubmit($sDisplayValue, $sClassName = null, $sEndpoint = null)
+    function returnSubmit($sDisplayValue, $sClassName = null, $sEndpoint = null)
     {
-        return '<a href="#" '.($sEndpoint ? 'data-endpoint="' .$sEndpoint  . '"' : '').' class="btn btn-primary btn-ajax-submit' . ($sClassName ? ' ' . $sClassName : ''). '"><span>' . $sDisplayValue . '</span></a>';
+        return '<a href="#" '.($sEndpoint ? 'data-endpoint="' .xssProtect($sEndpoint)  . '"' : '').' class="btn btn-primary btn-ajax-submit' .
+         ($sClassName ? ' ' . xssProtect($sClassName) : ''). '"><span>' . xssProtect($sDisplayValue) . '</span></a>';
     }
 
-    function printButtonLine($sDisplayValue, $sClassName = null, $sLineClassNames = '')
+    function returnButtonLine($sDisplayValue, $sClassName = null, $sLineClassNames = '')
     {
         $sLineClassName = 'button-line form-group row mb-3 justify-content-end ';
         $sLineClassName .= $sLineClassNames ? $sLineClassNames : '';
 
         return '
-        <div class="' . mb_trim($sLineClassName) . '">
+        <div class="' . mb_trim(xssProtect($sLineClassName)) . '">
             <div class="button-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
-                ' . $this->printButton($sDisplayValue, $sClassName) . '
+                ' . $this->returnButton($sDisplayValue, $sClassName) . '
             </div>
         </div>';
         
     }
 
-    function printButton($sDisplayValue, $sClassName = null)
+    function returnButton($sDisplayValue, $sClassName = null)
     {
-        return '<a href="#" class="btn' . ($sClassName ? ' ' . $sClassName : ''). '"><span>' . $sDisplayValue . '</span></a>';
+        return '<a href="#" class="btn' . ($sClassName ? ' ' . xssProtect($sClassName) : ''). '"><span>' . xssProtect($sDisplayValue) . '</span></a>';
     }
 
-    function printHTMLLine($sHTML = '&nbsp;', $sLineClassNames = '')
+    function returnHTMLLine($sHTML = '&nbsp;', $sLineClassNames = '', $xssProtect = true)
     {
         $sClassName = 'html-line form-group row mb-3 justify-content-end ';
         $sClassName .= $sLineClassNames ? $sLineClassNames : '';
 
         return '
-        <div class="' . mb_trim($sClassName) . '">
-            <div class="col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">' . $sHTML . '</div>
+        <div class="' . mb_trim(xssProtect($sClassName)) . '">
+            <div class="col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">' . ($xssProtect ? ($sHTML) : $sHTML) . '</div>
         </div>';
+    }
+
+    function outStartTag() {
+        echo $this->returnStartTag();
+    }
+
+    function outMsg() {
+        echo $this->returnMsg();
+    }
+
+    function outEndTag() {
+        echo $this->returnEndTag();
+    }
+
+    function outInput($sFieldName, $arrFieldAttributes = null) {
+        echo $this->returnInput($sFieldName, $arrFieldAttributes = null);
+    }
+
+    function outLine($sFieldName, $sLabel, $arrFieldAttributes = null, $sLineClassNames = '')
+    {
+        echo $this->returnLine($sFieldName, $sLabel, $arrFieldAttributes, $sLineClassNames);
+    }
+
+    function outCheckboxLine($sFieldName, $sLabel, $arrFieldAttributes = null, $sLineClassNames = '') {
+        echo $this->returnCheckboxLine($sFieldName, $sLabel, $arrFieldAttributes, $sLineClassNames);
+    }
+
+    function outSubmitLine($sDisplayValue, $sClassName = null, $sEndpoint = null, $sLineClassNames = '') {
+        echo $this->returnSubmitLine($sDisplayValue, $sClassName, $sEndpoint, $sLineClassNames);
+    }
+
+    function outSubmit($sDisplayValue, $sClassName = null, $sEndpoint = null) {
+        echo $this->returnSubmit($sDisplayValue, $sClassName, $sEndpoint) ;
+    }
+
+    function outButtonLine($sDisplayValue, $sClassName = null, $sLineClassNames = '') {
+        echo $this->returnButtonLine($sDisplayValue, $sClassName, $sLineClassNames);
+    }
+
+    function outButton($sDisplayValue, $sClassName = null) {
+        echo $this->returnButton($sDisplayValue, $sClassName);
+    }
+
+    function outHTMLLine($sHTML = '&nbsp;', $sLineClassNames = '', $xssProtect = true) {
+        echo $this->returnHTMLLine($sHTML, $sLineClassNames, $xssProtect);
     }
 }

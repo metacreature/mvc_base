@@ -111,3 +111,4 @@ define('SETTINGS_AVAILABLE_LANG', array(
 ));
 
 
+require DOCUMENT_ROOT .'/lib//vendor/autoload.php';

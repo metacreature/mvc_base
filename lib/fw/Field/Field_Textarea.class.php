@@ -45,7 +45,7 @@ class Field_Textarea extends Field_Text
         return array_merge($_arrAttributes, $arrAttributes);
     }
 
-    function printInput($arrAttributes = null, $bFormDisabled = false)
+    function returnInput($arrAttributes = null, $bFormDisabled = false)
     {
         $arrAttributes = $this->_getAttributes($arrAttributes, $bFormDisabled);
 

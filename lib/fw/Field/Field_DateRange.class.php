@@ -154,7 +154,7 @@ class Field_DateRange extends Field_Date
         return $this->_checkError();
     }
 
-    function printInput($arrAttributes = null, $bFormDisabled = false)
+    function returnInput($arrAttributes = null, $bFormDisabled = false)
     {
         $arrAttributesFrom = $this->_getAttributes($arrAttributes, $bFormDisabled);
         $arrAttributesFrom['name'] .= '[from]';

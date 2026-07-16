@@ -13,6 +13,7 @@ module.exports = function(grunt) {
 				'static/js/fw/fw_utils.min.js': ['static/js/fw/fw_utils.js'],
 				'static/js/fw/fw_ajax_form.min.js': ['static/js/fw/fw_ajax_form.js'],
 				'static/js/fw/fw_ajax_form_button.min.js': ['static/js/fw/fw_ajax_form_button.js'],
+				'static/js/jquery_confirm/jquery-confirm.min.js': ['static/js/jquery_confirm/jquery-confirm.js'],
 				'static/js/main.min.js': ['static/js/main.js'],
 				}
 		    },
@@ -26,6 +27,7 @@ module.exports = function(grunt) {
 				'static/js/fw/fw_utils.min.js',
 				'static/js/fw/fw_ajax_form.min.js',
 				'static/js/fw/fw_ajax_form_button.min.js',
+				'static/js/jquery_confirm/jquery-confirm.min.js',
 				'static/js/main.min.js'
 			  ],
 		      dest: 'static/bundle.min.js',

@@ -2,19 +2,19 @@
 /*
  File: Field_Base.class.php
  Copyright (c) 2014 Clemens K. (https://github.com/metacreature)
- 
+
  MIT License
- 
+
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in all
  copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -49,7 +49,7 @@ abstract class Field_Base
     protected $_sErrorCode = '';
 
     protected $_sRegEx = '';
-    
+
     protected $_iMinLength = null;
 
     protected $_iMaxLength = null;
@@ -66,7 +66,7 @@ abstract class Field_Base
 
     function __construct($sName)
     {
-        $this->_sName = $sName;
+        $this->_sName = preg_replace('#[^a-zA-Z0-9_]#', '', $sName);
     }
 
     function getType()
@@ -149,7 +149,7 @@ abstract class Field_Base
         $this->_sRegEx = $sRegEx;
         return $this;
     }
-    
+
     function getMinLength()
     {
         return $this->_iMinLength;
@@ -171,7 +171,7 @@ abstract class Field_Base
         $this->_iMaxLength = $iMaxLength;
         return $this;
     }
-    
+
     function getName()
     {
         return $this->_sName;
@@ -351,5 +351,9 @@ abstract class Field_Base
 
     abstract function validate();
 
-    abstract function printInput($arrAttributes, $bFormDisabled);
+    abstract function returnInput($arrAttributes, $bFormDisabled);
+
+    function outInput($arrAttributes, $bFormDisabled) {
+    	echo $this->returnInput($arrAttributes, $bFormDisabled);
+    }
 }
