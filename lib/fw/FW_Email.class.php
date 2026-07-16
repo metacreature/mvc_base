@@ -1,7 +1,17 @@
 <?php
 
+require_once (DOCUMENT_ROOT . '/lib/fw/FW_Email.class.php');
+//require_once(DOCUMENT_ROOT . '/lib/ecternal/Html2Text.php');
+//require_once(DOCUMENT_ROOT . '/lib/ecternal/Html2TextException.php');
+
 class FW_Email extends PHPMailer\PHPMailer\PHPMailer
 {
+
+	function html2text($html, $ignore_error = false) {
+		$html = preg_replace('#([\n\r\t ]*<br>|<br />)[\n\r\t ]*#', "\n", $html);
+		return Soundasleep\Html2Text::convert(nl2br($html), $ignore_error);
+	}
+
 	function send() 
 	{
 		if (TEST_SERVER) {

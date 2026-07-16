@@ -27,7 +27,7 @@
 
 require_once (DOCUMENT_ROOT . '/lib/base.cont.php');
 require_once (DOCUMENT_ROOT . '/models/user.model.php');
-require_once ('lib/fw/FW_Email.class.php');
+require_once (DOCUMENT_ROOT . '/lib/fw/FW_Email.class.php');
 
 
 class Controller_User_Password extends Controller_Base
