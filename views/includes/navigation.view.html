@@ -46,7 +46,8 @@
 		<ul class="navbar-nav justify-content-end navbar-fixed">
 
 <?php 
-	if (Controller_Base::is_login()) { 
+	if (SETTINGS_LOGIN_ENABLED) {
+		if (Controller_Base::is_login()) { 
 ?>
 			<li class="nav-item">
 				<a class="nav-link icon-link" href="/user/profile" title="<?php outT(Controller_Base::get_user_name()); ?>">
@@ -67,8 +68,8 @@
 			</li>
 
 <?php 
-	} else  { 
-		if (SETTINGS_ALLOW_REGISTER) { 
+		} else  { 
+			if (SETTINGS_REGISTER_ENABLED) { 
 ?>
 			<li class="nav-item">
 				<a class="nav-link icon-link" href="/user/register" title="<?php outT(LANG_NAVIGATION_REGISTER); ?>">
@@ -80,7 +81,7 @@
 			</li>
 
 <?php
-		} 
+			} 
 ?>
 			<li class="nav-item">
 				<a class="nav-link icon-link" href="/user/login" title="<?php outT(LANG_NAVIGATION_LOGIN); ?>">
@@ -92,7 +93,8 @@
 			</li>
 
 <?php
-	} 
+		}
+	}
 ?>
 			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" title="<?php outT(LANG_NAVIGATION_LANGUAGE.LANGUAGE_LIST[SELECTED_LANG]) ?>" aria-expanded="false">
@@ -101,7 +103,7 @@
 				<ul class="dropdown-menu dropdown-menu-end" id="select_language">
 
 <?php 
-	foreach(array_intersect_key(LANGUAGE_LIST, array_flip(SETTINGS_AVAILABLE_LANG)) as $key => $value) {
+	foreach(array_intersect_key(LANGUAGE_LIST, array_flip(SETTINGS_LANG_AVAILABLE)) as $key => $value) {
 		if (SELECTED_LANG == $key) {
 ?>
 					<li>

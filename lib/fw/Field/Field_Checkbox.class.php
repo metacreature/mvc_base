@@ -29,7 +29,7 @@ require_once 'Field_Base.class.php';
 class Field_Checkbox extends Field_Base
 {
 
-    protected $_sClassName = 'fieldcheckbox';
+    protected $_sClassName = 'fieldcheckbox form-check-input';
 
     function __construct($sName)
     {
@@ -49,9 +49,9 @@ class Field_Checkbox extends Field_Base
 
     function resolveRequest($arrRequest)
     {
-        //if (array_key_exists('_available_' . $this->_sName, $arrRequest)) {
+        if (array_key_exists('_available_' . $this->_sName, $arrRequest)) {
             $this->setValue(! empty($arrRequest[$this->_sName]) ? 1 : 0);
-        //}
+        }
     }
 
     protected function _validateMandatory()
@@ -96,6 +96,6 @@ class Field_Checkbox extends Field_Base
         if (!empty($arrAttributes['autocomplete'])) {
             unset($arrAttributes['autocomplete']);
         }
-        return '<input' . $this->_buildAttributesString($arrAttributes) . '>'; // . '<input type="hidden" name="_available_' . $this->_sName . '" value="1">';
+        return '<input' . $this->_buildAttributesString($arrAttributes) . '><input type="hidden" name="_available_' . $this->_sName . '" value="1">';
     }
 }

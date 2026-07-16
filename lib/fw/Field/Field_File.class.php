@@ -29,7 +29,7 @@ require_once 'Field_Base.class.php';
 class Field_File extends Field_Base
 {
 
-    protected $_sClassName = 'fieldfile';
+    protected $_sClassName = 'fieldfile form-control';
 
     protected $_arrExtensions = array();
 

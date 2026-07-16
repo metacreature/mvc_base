@@ -24,7 +24,7 @@
  SOFTWARE.
 */
 
-define('FW_ErrorLogger_file_name', 'ErrorLogger.'.hash('sha256', SECURE_SALT).'.log.html');
+define('FW_ErrorLogger_file_name', 'error_logger.log.html');
 
 
 class FW_ErrorLogger

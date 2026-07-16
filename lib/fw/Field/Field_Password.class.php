@@ -31,7 +31,7 @@ class Field_Password extends Field_Text
 
     protected $_sType = 'password';
 
-    protected $_sClassName = 'fieldpassword';
+    protected $_sClassName = 'fieldpassword form-control';
 
     protected function _getAttributes($arrAttributes, $bFormDisabled)
     {

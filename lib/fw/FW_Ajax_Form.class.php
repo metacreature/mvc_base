@@ -60,7 +60,6 @@ class FW_Ajax_Form
         $oField->setValue($sDefaultValue);
         $oField->setDisabled($bDisabled);
         $oField->setFieldErrors($this->_arrFieldErrors);
-        $oField->setClassName($oField->getClassName().' form-control');
         $this->_arrFormFields[$sFieldName] = $oField;
 
         return $oField;
@@ -239,7 +238,7 @@ class FW_Ajax_Form
         }
         
         if($this->_activate_secure) {
-            $secure = md5(uniqid(SECURE_SALT, true));
+            $secure = md5(uniqid(mt_rand(), true));
             if (!isset($_SESSION['ajaxform_secure'])) {
                 $_SESSION['ajaxform_secure'] = array();
             }
@@ -343,8 +342,10 @@ class FW_Ajax_Form
         return '
         <div class="' . mb_trim(xssProtect($sClassName)) . '">
             <div class="field-wrapper col-'.$this->_col_behavior_break.'-'.$this->_col_behavior_field.'">
-                ' . $this->returnInput($sFieldName, $arrFieldAttributes) . '
-                <label class="control-label" for="' . $sFieldName . '" aria-label-for="' . $sFieldName . '">' . xssProtect($sLabel) . '</label>
+                <div class="form-check">
+                    ' . $this->returnInput($sFieldName, $arrFieldAttributes) . '
+                    <label class="form-check-label" for="' . $sFieldName . '" aria-label-for="' . $sFieldName . '">' . xssProtect($sLabel) . '</label>
+                </div>
             </div>
         </div>';
     }

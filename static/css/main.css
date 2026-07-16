@@ -234,28 +234,37 @@ form.ajax-form .form-group:last-child{
 	animation: hide_msg 1s linear 3s;
 	animation-fill-mode: forwards;
 }
-
+input.form-check-input{
+	margin-top: 5px;
+}
 div label.control-label{
+	text-align: left !important;
+}
+.form-check label.form-check-label{
 	text-align: left !important;
 }
 @media (min-width: 576px) {
 	div .break-sm label.control-label {
 		text-align: right !important;
+		padding-top: 6px;
 	}
 }
 @media (min-width: 768px) {
 	div .break-md label.control-label {
 		text-align: right !important;
+		padding-top: 6px;
 	}
 }
 @media (min-width: 992px) {
 	div .break-lg label.control-label {
 		text-align: right !important;
+		padding-top: 6px;
 	}
 }
 @media (min-width: 1200px) {
 	div .break-xl label.control-label {
 		text-align: right !important;
+		padding-top: 6px;
 	}
 }
 

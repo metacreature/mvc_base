@@ -29,7 +29,7 @@ require_once 'Field_Base.class.php';
 class Field_Select extends Field_Base
 {
 
-    protected $_sClassName = 'fieldselect';
+    protected $_sClassName = 'fieldselect form-control';
 
     protected $_arrList;
 

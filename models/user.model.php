@@ -52,12 +52,12 @@ class Model_User extends Model_Base{
     }
 
     protected function _crypt_password($password) {
-        return hash('sha512', SECURE_SALT . $password . SECURE_SALT . $password);
+        return hash('sha512', SECURITY_SALT . $password . SECURITY_SALT . $password);
     }
 
     protected function _calc_remember_token($user_token) {
-        $ip = SETTINGS_REMEMBER_LOGIN_USE_IP ? $_SERVER['REMOTE_ADDR'] : '';
-        $user_agent = SETTINGS_REMEMBER_LOGIN_USE_USER_AGENT ? $_SERVER['HTTP_USER_AGENT'] : '';
+        $ip = SECURITY_LOGIN_USE_IP ? $_SERVER['REMOTE_ADDR'] : '';
+        $user_agent = SECURITY_LOGIN_USE_USER_AGENT ? $_SERVER['HTTP_USER_AGENT'] : '';
         return create_db_token($user_token, $_SERVER['HTTP_ACCEPT_LANGUAGE']. $user_agent . $ip);
     }
 
@@ -84,7 +84,7 @@ class Model_User extends Model_Base{
         $db_token = $this->_calc_remember_token($user_token);
         $res = $this->_db->executePreparedQuery(
             'SELECT * FROM tbl_user WHERE user_id IN (SELECT user_id FROM tbl_user_remember WHERE db_token = ? AND insert_timestamp > NOW() - INTERVAL ? day);',
-            [$db_token, SETTINGS_REMEMBER_LOGIN_EXPIRE]);
+            [$db_token, SETTINGS_LOGIN_REMEMBER_EXPIRE]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             if ($data) {

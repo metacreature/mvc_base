@@ -24,91 +24,36 @@
  SOFTWARE.
 */
 
+ini_set('error_reporting', E_ALL);
+ini_set('display_errors', true);
+
 if (!empty($_SERVER['HTTP_HOST'])) {
-    define('TEST_SERVER', strpos($_SERVER['HTTP_HOST'], 'localhost') !== false);
+    define('IS_LOCALHOST', preg_match('#localhost$#', $_SERVER['HTTP_HOST']) !== false);
 } else {
-    define('TEST_SERVER', false);
+    define('IS_LOCALHOST', false);
 }
 
-// settings
-define('SETTINGS_ALLOW_REGISTER', true);
-define('SETTINGS_ALLOW_USER_DEFINED_PASSWORDS', true);
-define('SETTINGS_LIST_REQUIRES_LOGIN', false);
-define('SETTINGS_REMEMBER_LOGIN_ENABLED', false);
-define('SETTINGS_REMEMBER_LOGIN_USE_IP', false);
-define('SETTINGS_REMEMBER_LOGIN_USE_USER_AGENT', false);
-define('SETTINGS_REMEMBER_LOGIN_EXPIRE', 365);
-define('SETTINGS_FORGOTTEN_PASSWORD_EXPIRE', 15);
-define('SETTINGS_LOGIN_BRUTEFORCE_EXPIRE', 24);
-define('SETTINGS_LOGIN_BRUTEFORCE_CNT', 8);
-define('SETTINGS_DEFAULT_LANG', 'en');
-define('SETTINGS_CURRENCY', 'â‚¬');
-
-
-// Email-config
-define('EMAIL_FROM_NAME', 'Recipes by Metacreature');
-define('EMAIL_FROM_MAIL', 'no-reply@metacreature.com');
-define('EMAIL_RETURN_PATH', 'metacreature@metacreature.com');
-define('EMAIL_GREETING_NAME', 'Metacreature');
-
-
-
-// FW-Config
-define('USER_TIMEZONE', 'Europe/Vienna');
-define('SECURE_SALT', '18dd27efc08342874wgdfhdhz28265203e964c9');
-define('HIDDEN_IMAGEFOLDER_SECURE', 'kjdfgutalocveabta');
-
-
-if (TEST_SERVER) {
-
-	// db-config
-	define('DB_HOST', 'localhost');
-	define('DB_USERNAME', 'metacreature');
-	define('DB_PASSWORD', 'jhdfd865#838383');
-	define('DB_NAME', 'recipes');
-	define('DB_PERSISTENT', false);
-
-	// error-logging
-    define('DEBUG_MODE', true);
-	define('DEBUG_EXECUTION_TIME', true);
-    ini_set('error_reporting', E_ALL);
-    ini_set('display_errors', true);
-
-	// domain
-    define('WEB_URL', 'http://mvc_base.localhost');
-    define('WEB_DOMAIN', 'mvc_base.localhost');
-} else {
-
-	// db-config
-	define('DB_HOST', 'localhost');
-	define('DB_USERNAME', 'domain_metacreature');
-	define('DB_PASSWORD', 'hkzuyzhjyd');
-	define('DB_NAME', 'domain_recipes');
-	define('DB_PERSISTENT', false);
-
-	// error-logging
-    define('DEBUG_MODE', false);
-	define('DEBUG_EXECUTION_TIME', false);
-    ini_set('error_reporting', E_ALL);
-    ini_set('display_errors', false);
-
-	// domain
-    define('WEB_URL', 'https://recipes.metacreature.com');
-    define('WEB_DOMAIN', 'recipes.metacreature.com');
-}
-
-// other (don't modify)
-define('SETTINGS_LANDING_PAGE', '/home');
 define('WEB_ROOT', '');
+define('WEB_DOMAIN', $_SERVER['HTTP_HOST']);
+define('WEB_URL', $_SERVER['REQUEST_SCHEME'].'://'.WEB_DOMAIN);
 define('DOCUMENT_ROOT', dirname(dirname(__FILE__)));
 
-date_default_timezone_set(USER_TIMEZONE);
+$ini_data = parse_ini_file(DOCUMENT_ROOT.'/.env.'.strtolower($_SERVER['SERVER_NAME']), false, INI_SCANNER_TYPED);
 
+if ($ini_data['SECURITY_FORCE_HTTPS'] && strtolower($_SERVER['REQUEST_SCHEME']) !== 'https') {
+	header('Location: https://'.WEB_DOMAIN);
+}
 
+foreach($ini_data as $key => $value) {
+	try{
+		define($key, $value);
+	} catch (Exception $e) {}
+}
 
-define('SETTINGS_AVAILABLE_LANG', array(
-	'de', 'en'
-));
+ini_set('error_reporting', intval(PHP_ERROR_REPORTING));
+ini_set('display_errors', PHP_DISPLAY_ERRORS);
+date_default_timezone_set(SETTINGS_TIMEZONE);
 
+unset($ini_data);
 
 require DOCUMENT_ROOT .'/lib//vendor/autoload.php';

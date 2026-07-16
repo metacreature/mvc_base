@@ -33,6 +33,7 @@ require_once (DOCUMENT_ROOT . '/lib/fw/FW_Email.class.php');
 class Controller_User_Password extends Controller_Base
 {
     function __construct($db) {
+        $this->_forbidden(!SETTINGS_LOGIN_ENABLED);
         parent::__construct($db);
     }
 

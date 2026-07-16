@@ -33,7 +33,7 @@ require_once (DOCUMENT_ROOT.'/models/recipe.model.php');
 ini_set('max_execution_time', 3600);
 
 
-$db = FW_MySQLDataBaseLayer::singleton();
+$db = FW_MySQLDataBaseLayer::singleton(DEBUG_DB_QUERIES && IS_LOCALHOST);
 $recipe_obj = new Model_Recipe($db, 0);
 
 // clean db 
@@ -44,7 +44,7 @@ foreach($db->getAssocResults() as $row) {
 }
 $recipe_obj->clean_refs();
 
-$db->executePreparedQuery('DELETE FROM tbl_user_remember WHERE insert_timestamp < NOW() - INTERVAL ? day', [SETTINGS_REMEMBER_LOGIN_EXPIRE]);
+$db->executePreparedQuery('DELETE FROM tbl_user_remember WHERE insert_timestamp < NOW() - INTERVAL ? day', [SETTINGS_LOGIN_REMEMBER_EXPIRE]);
 $db->executePreparedQuery('DELETE FROM tbl_user_forgotten WHERE insert_timestamp < NOW() - INTERVAL ? MINUTE', [SETTINGS_FORGOTTEN_PASSWORD_EXPIRE]);
 $db->executePreparedQuery('DELETE FROM tbl_user_login_bruteforce WHERE insert_timestamp < NOW() - INTERVAL ? MINUTE', [SETTINGS_LOGIN_BRUTEFORCE_EXPIRE * 60]);
 

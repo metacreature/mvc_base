@@ -29,7 +29,7 @@ require_once 'Field_Text.class.php';
 class Field_Textarea extends Field_Text
 {
 
-    protected $_sClassName = 'fieldtextarea';
+    protected $_sClassName = 'fieldtextarea form-control';
 
     protected function _getAttributes($arrAttributes, $bFormDisabled)
     {

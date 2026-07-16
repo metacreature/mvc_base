@@ -33,7 +33,7 @@ class Field_Date extends Field_Base
 
     static $sExternalFormat = 'dd.mm.yyyy';
 
-    protected $_sClassName = 'fielddate';
+    protected $_sClassName = 'fielddate form-control';
 
     protected $_oMinDate = null;
 
@@ -75,7 +75,7 @@ class Field_Date extends Field_Base
         if ($mDate instanceof DateTime) {
             return $mDate->setTime(0, 0, 0);
         } else if (is_string($mDate) && mb_trim($mDate)) {
-            $mDate = DateTime::createFromFormat(FORMAT_DATE, mb_trim($mDate));
+            $mDate = DateTime::createFromFormat(SETTINGS_DATE_FORMAT_DATE, mb_trim($mDate));
             if ($mDate === false) {
                 return null;
             }

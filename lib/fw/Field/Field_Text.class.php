@@ -31,7 +31,7 @@ class Field_Text extends Field_Base
 
     protected $_sType = 'text';
 
-    protected $_sClassName = 'fieldtext';
+    protected $_sClassName = 'fieldtext form-control';
 
     protected $_sPlaceholder;
 

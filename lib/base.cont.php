@@ -34,28 +34,50 @@ class Controller_Base
     function __construct($db) {
         $this->_db = $db;
 
-        @session_name('session');
-        @session_start();
-        if (empty($_SESSION['session_started'])) {
-            @session_destroy();
-            $id = create_user_token(session_create_id(), $_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT'] );
+        if (empty($_COOKIE['session']) || strlen($_COOKIE['session']) < 150) {
+            $this->_sessionStart();
+        } else {
             @session_name('session');
-            @session_id($id);
             @session_start();
-        }
-        $_SESSION['session_started'] = true;
-
-        if (SETTINGS_REMEMBER_LOGIN_ENABLED && empty($_SESSION['login']) && !empty($_COOKIE['remember_token'])) {
-            $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
-            $data = $user_obj->loginRememberToken($_COOKIE['remember_token']);
-            if ($data) {
-                $_SESSION['login'] = true;
-                $_SESSION['user_id'] = $data['user_id'];
-                $_SESSION['user_name'] = $data['user_name'];
-            } else {
-                setcookie("remember_token", '', 1, "/", WEB_DOMAIN);
+            if (empty($_SESSION['session_started'])) {
+                @session_destroy();
+                $this->_sessionStart();
             }
         }
+        
+        if (SETTINGS_LOGIN_ENABLED) {
+            if (SETTINGS_LOGIN_REMEMBER_ENABLED && empty($_SESSION['login']) && !empty($_COOKIE['remember_token'])) {
+                $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
+                $data = $user_obj->loginRememberToken($_COOKIE['remember_token']);
+                if ($data) {
+                    $_SESSION['login'] = true;
+                    $_SESSION['user_id'] = $data['user_id'];
+                    $_SESSION['user_name'] = $data['user_name'];
+                } else {
+                    setcookie("remember_token", '', 1, "/", WEB_DOMAIN);
+                }
+            }
+        } else {
+            $_SESSION['login'] = false;
+        }
+    }
+
+    protected function _forbidden($is_forbidden) {
+        if ($is_forbidden) {
+            header('HTTP/1.0 403 Forbidden');
+            require_once(DOCUMENT_ROOT . '/crawler.html');
+            exit;
+        }
+    }
+
+    private function _sessionStart() {
+        $ip = SECURITY_LOGIN_USE_IP ? $_SERVER['REMOTE_ADDR'] : '';
+        $user_agent = SECURITY_LOGIN_USE_USER_AGENT ? $_SERVER['HTTP_USER_AGENT'] : '';
+        $id = create_user_token(session_create_id(), $ip.$user_agent );
+        @session_name('session');
+        @session_id($id);
+        @session_start();
+        $_SESSION['session_started'] = true;
     }
 
     static function is_login() {
@@ -90,7 +112,7 @@ class Controller_Base
     }
 
     protected function _add_create_password_fields($form) {
-        $field_type = SETTINGS_ALLOW_USER_DEFINED_PASSWORDS ? 'Password' : 'Hidden';
+        $field_type = SETTINGS_REGISTER_USER_DEFINED_PASSWORDS ? 'Password' : 'Hidden';
 
         $form->addField($field_type, 'password', true)
             ->setMinLength(8)

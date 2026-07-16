@@ -29,7 +29,7 @@ require_once 'Field_Date.class.php';
 class Field_DateRange extends Field_Date
 {
 
-    protected $_sClassName = 'fielddaterange';
+    protected $_sClassName = 'fielddaterange form-control';
 
     protected $_mValueFrom = null;
 

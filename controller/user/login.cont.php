@@ -31,6 +31,7 @@ require_once (DOCUMENT_ROOT . '/models/user.model.php');
 class Controller_User_Login extends Controller_Base
 {
     function __construct($db) {
+        $this->_forbidden(!SETTINGS_LOGIN_ENABLED);
         parent::__construct($db);
     }
 
@@ -59,9 +60,9 @@ class Controller_User_Login extends Controller_Base
                 $_SESSION['login'] = true;
                 $_SESSION['user_id'] = $data['user_id'];
                 $_SESSION['user_name'] = $data['user_name'];
-                if (SETTINGS_REMEMBER_LOGIN_ENABLED && $form->getValue('remember_login')) {
+                if (SETTINGS_LOGIN_REMEMBER_ENABLED && $form->getValue('remember_login')) {
                     $user_token = $user_obj->addRememberToken($form->getValue('password'));
-                    setcookie("remember_token", $user_token, time() + SETTINGS_REMEMBER_LOGIN_EXPIRE * 86400, "/", WEB_DOMAIN);
+                    setcookie("remember_token", $user_token, time() + SETTINGS_LOGIN_REMEMBER_EXPIRE * 86400, "/", WEB_DOMAIN);
                 }
                 return $form->getFormSuccess(LANG_LOGIN_SUCCESS);
             } else if ($data === false)  {

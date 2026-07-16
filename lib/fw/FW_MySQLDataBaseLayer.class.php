@@ -24,7 +24,7 @@
  SOFTWARE.
 */
 
-define('FW_MySQLDataBaseLayer_file_name', 'DBQueries.'.hash('sha256', SECURE_SALT).'.log.html');
+define('FW_MySQLDataBaseLayer_file_name', 'db_queries.log.html');
 
 class FW_MySQLDataBaseLayer
 {
@@ -78,21 +78,21 @@ class FW_MySQLDataBaseLayer
 
     /*
      * protected static $arrMySQLDateFormats = array(
-     * FORMAT_DATETIME => '%Y-%m-%d %H:%i:%s',
-     * FORMAT_DATE => '%Y-%m-%d',
-     * FORMAT_TIME => '%H:%i:%s',
+     * SETTINGS_DATE_FORMAT_DATETIME => '%Y-%m-%d %H:%i:%s',
+     * SETTINGS_DATE_FORMAT_DATE => '%Y-%m-%d',
+     * SETTINGS_DATE_FORMAT_TIME => '%H:%i:%s',
      * );
      */
     protected static $arrPHPDateFormats = array(
-        FORMAT_DATETIME => 'Y-m-d H:i:s',
-        FORMAT_DATE => 'Y-m-d',
-        FORMAT_TIME => 'H:i:s'
+        SETTINGS_DATE_FORMAT_DATETIME => 'Y-m-d H:i:s',
+        SETTINGS_DATE_FORMAT_DATE => 'Y-m-d',
+        SETTINGS_DATE_FORMAT_TIME => 'H:i:s'
     );
 
     protected static $arrDateLengthToFormat = array(
-        19 => FORMAT_DATETIME,
-        10 => FORMAT_DATE,
-        8 => FORMAT_TIME
+        19 => SETTINGS_DATE_FORMAT_DATETIME,
+        10 => SETTINGS_DATE_FORMAT_DATE,
+        8 => SETTINGS_DATE_FORMAT_TIME
     );
     
     protected static $_singleton = null;
@@ -146,12 +146,12 @@ class FW_MySQLDataBaseLayer
             $oDate = DateTime::createFromFormat(self::$arrPHPDateFormats[$sFormat], $sDate, new DateTimeZone(self::$_sTimeZone));
             if ($oDate !== false) {
                 switch ($sFormat) {
-                    case FORMAT_DATE:
+                    case SETTINGS_DATE_FORMAT_DATE:
                         $oDate->setTime(23, 59, 59);
                         $oDate->setTimezone(new DateTimeZone(date_default_timezone_get()));
                         $oDate->setTime(0, 0, 0);
                         break;
-                    case FORMAT_TIME:
+                    case SETTINGS_DATE_FORMAT_TIME:
                         $oDate->setTimezone(new DateTimeZone(date_default_timezone_get()));
                         $oDate->setDate(1900, 1, 1);
                         break;
@@ -170,7 +170,7 @@ class FW_MySQLDataBaseLayer
         return self::_dateToObj($sDate);
     }
 
-    static function _objToDate($oDate, $bPrepareForQuery, $sFormat = FORMAT_DATE)
+    static function _objToDate($oDate, $bPrepareForQuery, $sFormat = SETTINGS_DATE_FORMAT_DATE)
     {
         if ($oDate instanceof DateTime && array_key_exists($sFormat, self::$arrPHPDateFormats)) {
             $sDate = cloneObj($oDate)->setTimezone(new DateTimeZone(self::$_sTimeZone))->format(self::$arrPHPDateFormats[$sFormat]);
@@ -183,19 +183,19 @@ class FW_MySQLDataBaseLayer
         return null;
     }
 
-    function objToDate($oDate, $bPrepareForQuery, $sFormat = FORMAT_DATE)
+    function objToDate($oDate, $bPrepareForQuery, $sFormat = SETTINGS_DATE_FORMAT_DATE)
     {
         return self::_objToDate($oDate, $bPrepareForQuery, $sFormat);
     }
 
     function objToTime($oDate, $bPrepareForQuery)
     {
-        return self::_objToDate($oDate, $bPrepareForQuery, FORMAT_TIME);
+        return self::_objToDate($oDate, $bPrepareForQuery, SETTINGS_DATE_FORMAT_TIME);
     }
 
     function objToDateTime($oDate, $bPrepareForQuery)
     {
-        return self::_objToDate($oDate, $bPrepareForQuery, FORMAT_DATETIME);
+        return self::_objToDate($oDate, $bPrepareForQuery, SETTINGS_DATE_FORMAT_DATETIME);
     }
 
     // ================ Getter ================ //

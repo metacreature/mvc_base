@@ -31,12 +31,8 @@ require_once (DOCUMENT_ROOT . '/models/user.model.php');
 class Controller_User_Register extends Controller_Base
 {
     function __construct($db) {
+        $this->_forbidden(!SETTINGS_LOGIN_ENABLED || !SETTINGS_REGISTER_ENABLED);
         parent::__construct($db);
-        if (!SETTINGS_ALLOW_REGISTER) {
-            header('HTTP/1.0 403 Forbidden');
-            require_once(DOCUMENT_ROOT . '/crawler.html');
-            exit;
-        }
     }
 
     protected function _get_form() {
