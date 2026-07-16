@@ -2,7 +2,6 @@
 .project
 /.settings/
 /.vscode/
-/_logs/
 /_mails/
 /static/node_modules/*
 /static/package-lock.json
