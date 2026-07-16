@@ -1,7 +1,7 @@
 
 function clickGenPassword(e, popuptitle, popuptext, popupbutton) {
     e.preventDefault();
-  let pass = generatePassword(20);
+  let pass = generatePassword(18);
   $('input#password').val(pass);
   $('input#password_confirmation').val(pass);
   let copy = copyTextToClipboard(pass);

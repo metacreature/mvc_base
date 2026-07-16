@@ -36,9 +36,14 @@ function log_runtime() {
 		$memory = round(memory_get_usage() / 1024);
 
 		$dirname = DOCUMENT_ROOT. '/_logs/';
+		if (!file_exists($dirname)) {
+			mkdir($dirname, 0777, true);
+			file_put_contents($dirname . '.htaccess', 'deny from all');
+		}
+		
 		$file_name = 'execution_time.'.hash('sha256', SECURE_SALT).'.log.csv';
 		$f = fopen($dirname .$file_name, "a+");
-		fwrite($f, '"' . $url . '";' . $time . ';Î¼s;' . $memory . ";kb\n");
+		fwrite($f, '"' . $url . '";' . $time . ';ms;' . $memory . ";kb\n");
 		fclose($f );
 	}
 }

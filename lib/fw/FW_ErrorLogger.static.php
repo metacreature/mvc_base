@@ -241,6 +241,11 @@ class FW_ErrorLogger
                 // prepares the path of the log-file
                 $sDirName = DOCUMENT_ROOT . '/_logs/';
 
+                if (!file_exists($sDirName)) {
+                    mkdir($sDirName, 0777, true);
+                    file_put_contents($sDirName . '.htaccess', 'deny from all');
+                }
+
                 // prepares the message
                 $sContentToWrite = "\n<div class=\"errorlogger\">\n	<b>" . date('d.m.Y - H:i:s') . "</b><br>\n	<i>" . $sMessage . "</i>\n";
                 $sContentToWrite .= $sPrettyPrintedCallStack;

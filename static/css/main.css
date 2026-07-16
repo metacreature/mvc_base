@@ -386,6 +386,9 @@ ul.navbar-fixed .nav-item.dropdown{
 	:root{
 		--bs-nav-link-font-size: 16px;
 	}
+	body{
+		padding-top: 54px;
+	}
 	.navbar{
 		line-height: 20px;
 	}

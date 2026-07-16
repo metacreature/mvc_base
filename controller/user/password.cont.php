@@ -27,6 +27,7 @@
 
 require_once (DOCUMENT_ROOT . '/lib/base.cont.php');
 require_once (DOCUMENT_ROOT . '/models/user.model.php');
+require_once ('lib/fw/FW_Email.class.php');
 
 
 class Controller_User_Password extends Controller_Base
@@ -100,7 +101,7 @@ class Controller_User_Password extends Controller_Base
                 ob_clean();
 
                 try {
-                    $mail = new PHPMailer\PHPMailer\PHPMailer;
+                    $mail = new FW_Email();
                     $mail->setLanguage(SELECTED_LANG);
                     $mail->From = EMAIL_FROM_MAIL;
                     $mail->FromName = EMAIL_FROM_NAME;

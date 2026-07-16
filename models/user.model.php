@@ -159,7 +159,7 @@ class Model_User extends Model_Base{
         $email = strtolower($email);
 
         $res = $this->_db->executePreparedQuery(
-            'SELECT user_id, user_name, email FROM tbl_user WHERE LOWER(email) = ?;',
+            'SELECT user_id, user_name, email, password FROM tbl_user WHERE LOWER(email) = ?;',
             [$email]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
