@@ -127,7 +127,7 @@ class Model_User extends Model_Base{
 
     function create($user_name, $email, $password) {
         return $this->_db->executeQuery(
-            'INSERT INTO tbl_user (user_name, email, password, last_edited) VALUES (?,?,?, NOW())',
+            'INSERT INTO tbl_user (user_name, email, password, insert_timestamp, update_timestamp) VALUES (?,?,?, NOW(), NOW())',
             [$user_name, $email, $this->_crypt_password($password)]);
     }
 
@@ -169,7 +169,7 @@ class Model_User extends Model_Base{
         $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
                 password = ?,
-                last_edited = NOW(),
+                update_timestamp = NOW(),
                 cnt_update = cnt_update + 1
             WHERE user_id IN (SELECT user_id FROM tbl_user_forgotten WHERE db_token = ? AND insert_timestamp > NOW() - INTERVAL ? MINUTE);',
             [$this->_crypt_password($password), $db_token, SETTINGS_FORGOTTEN_PASSWORD_EXPIRE]);
@@ -195,7 +195,7 @@ class Model_User extends Model_Base{
         $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
                 user_name = ?,
-                last_edited = NOW(),
+                update_timestamp = NOW(),
                 cnt_update = cnt_update + 1
             WHERE user_id = ?;',
             [$user_name, $this->_user_id]);
@@ -211,7 +211,7 @@ class Model_User extends Model_Base{
         $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
                 email = ?,
-                last_edited = NOW(),
+                update_timestamp = NOW(),
                 cnt_update = cnt_update + 1
             WHERE user_id = ? AND password = ?;',
             [$email, $this->_user_id, $this->_crypt_password($actual_password)]);
@@ -227,7 +227,7 @@ class Model_User extends Model_Base{
         $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
                 password = ?,
-                last_edited = NOW(),
+                update_timestamp = NOW(),
                 cnt_update = cnt_update + 1
             WHERE user_id = ? AND password = ?;',
             [$this->_crypt_password($password), $this->_user_id, $this->_crypt_password($actual_password)]);
