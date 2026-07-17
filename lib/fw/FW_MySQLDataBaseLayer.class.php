@@ -25,6 +25,7 @@
 */
 
 require_once ('FW_ErrorLogger.static.php');
+require_once ('FW_Date.static.php');
 
 define('FW_MySqlDataBaseLayer_file_name', 'db_queries.log.html');
 
