@@ -50,21 +50,12 @@ function log_runtime() {
 
 // FW-Includes
 require_once ('lib/settings.inc.php');
-require_once ('lib/languagelist.php');
 require_once ('lib/fw/func.inc.php');
-require_once ('lib/fw/FW_ErrorLogger.static.php');
 require_once ('lib/fw/FW_MySQLDataBaseLayer.class.php');
 
-// language
-$selected_lang = SETTINGS_LANG_DEFAULT;
-if (!empty($_COOKIE['selected_lang']) && in_array($_COOKIE['selected_lang'], SETTINGS_LANG_AVAILABLE)) {
-	$selected_lang = $_COOKIE['selected_lang'];
-}
-define('SELECTED_LANG', $selected_lang);
-require_once (DOCUMENT_ROOT . '/language/' . SELECTED_LANG . '.lang.php');
 
 // database
-$db = FW_MySQLDataBaseLayer::singleton(DEBUG_DB_QUERIES && IS_LOCALHOST);
+$db = FW_MySQLDataBaseLayer::singleton(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME, DB_PERSISTENT, SETTINGS_TIMEZONE, DEBUG_DB_QUERIES && IS_LOCALHOST);
 ignore_user_abort(true);
 
 // get request

@@ -25,7 +25,8 @@
 */
 
 
-require_once (DOCUMENT_ROOT . '/lib/fw/FW_Ajax_Form.class.php');
+require_once ('fw/FW_Ajax_Form.class.php');
+require_once ('languagelist.php');
 
 class Controller_Base
 {
@@ -60,6 +61,24 @@ class Controller_Base
         } else {
             $_SESSION['login'] = false;
         }
+
+        // language
+        $selected_lang = SETTINGS_LANG_DEFAULT;
+        if (!empty($_COOKIE['selected_lang']) && in_array($_COOKIE['selected_lang'], SETTINGS_LANG_AVAILABLE)) {
+            $selected_lang = $_COOKIE['selected_lang'];
+        } else {
+            $accept_lang = preg_split('#[,;]#', $_SERVER['HTTP_ACCEPT_LANGUAGE']); //de,en-US;q=0.9,en;q=0.8
+            foreach ($accept_lang as $lang) {
+                $lang = preg_replace('#^([a-z]+).*#', '$1',$lang);
+                if (in_array($lang, SETTINGS_LANG_AVAILABLE)) {
+                    $selected_lang = $lang;
+                    break;
+                }
+            }
+        }
+
+        define('SELECTED_LANG', $selected_lang);
+        require_once (DOCUMENT_ROOT . '/language/' . SELECTED_LANG . '.lang.php');
     }
 
     protected function _forbidden($is_forbidden) {

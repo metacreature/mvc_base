@@ -41,26 +41,6 @@ class FW_ErrorLogger
     static $bPrintCallStack = true;
 
     /**
-     * bLogInDB
-     * Defines if the errormessages should be strored in the database
-     * !!! Write your own queries & code @ _write
-     * see _write
-     *
-     * @static
-     */
-    static $bLogInDB = false;
-
-    /**
-     * bLogInFile
-     * Defines if the errormessages should be strored in the a file
-     * !!! override if bLogInDB = true and the error is not logged in the db or db-logging fails
-     * see _write
-     *
-     * @static
-     */
-    static $bLogInFile = true;
-
-    /**
      * sLogFileName
      * defines the filename of the errorlog
      * !!! Use a crypted filename to avoid unauthorized access
@@ -210,55 +190,29 @@ class FW_ErrorLogger
      */
     static function _write($sMessage, $sPrettyPrintedCallStack, $sFileName = null)
     {
-        // force LogInfile if the sql-query fails
-        $bForceLogInFile = true;
 
-        // writes the whole message to the database
-        if (self::$bLogInDB) {
-            try {
-                // !!!!!!!! Write your own queries & code here - Start
+        try {
+            // prepares the path of the log-file
+            $sDirName = DOCUMENT_ROOT . '/_logs/';
 
-                if (@$db->getIsInit()) {
-                    $sMessageDB = @$db->MySQL_Safety($sMessage);
-                    $sCallStackDB = @$db->MySQL_Safety($sPrettyPrintedCallStack);
-                    if (@$db->executeQuery('INSERT INTO tbl_error SET datee = NOW(),
-					msg = ' . $sMessageDB . ', cst = ' . $sCallStackDB . ';')) {
-                        if (@$db->getAffectedRows() == 1) {
-                            $bForceLogInFile = false;
-                        }
-                    }
-                }
-                // !!!!!!!! Write your own queries & code here - End
-            } catch (Exception $e) {
-                $bForceLogInFile = true;
+            if (!file_exists($sDirName)) {
+                mkdir($sDirName, 0777, true);
+                file_put_contents($sDirName . '.htaccess', 'deny from all');
             }
-        } else {
-            $bForceLogInFile = false;
-        }
 
-        if (self::$bLogInFile || $bForceLogInFile) {
-            try {
-                // prepares the path of the log-file
-                $sDirName = DOCUMENT_ROOT . '/_logs/';
+            // prepares the message
+            $sContentToWrite = "\n<div class=\"errorlogger\">\n	<b>" . date('d.m.Y - H:i:s') . "</b><br>\n	<i>" . $sMessage . "</i>\n";
+            $sContentToWrite .= $sPrettyPrintedCallStack;
+            $sContentToWrite .= "\n</div><div style=\"clear:both;\"></div>\n";
 
-                if (!file_exists($sDirName)) {
-                    mkdir($sDirName, 0777, true);
-                    file_put_contents($sDirName . '.htaccess', 'deny from all');
-                }
-
-                // prepares the message
-                $sContentToWrite = "\n<div class=\"errorlogger\">\n	<b>" . date('d.m.Y - H:i:s') . "</b><br>\n	<i>" . $sMessage . "</i>\n";
-                $sContentToWrite .= $sPrettyPrintedCallStack;
-                $sContentToWrite .= "\n</div><div style=\"clear:both;\"></div>\n";
-
-                // writes the whole message to the log-file
-                $sFileName = ($sFileName ? $sFileName : self::$sLogFileName);
-                $sFileContent = @file_get_contents($sDirName . $sFileName);
-                @file_put_contents($sDirName . $sFileName, $sContentToWrite . $sFileContent);
-                @chmod($sDirName . $sFileName, 0777);
-                
-            } catch (Exception $e) {}
-        }
+            // writes the whole message to the log-file
+            $sFileName = ($sFileName ? $sFileName : self::$sLogFileName);
+            $sFileContent = @file_get_contents($sDirName . $sFileName);
+            @file_put_contents($sDirName . $sFileName, $sContentToWrite . $sFileContent);
+            @chmod($sDirName . $sFileName, 0777);
+            
+        } catch (Exception $e) {}
+        
     }
 }
 

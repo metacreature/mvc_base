@@ -112,7 +112,7 @@ class Controller_User_Password extends Controller_Base
                     $mail->Body = $message;
                     $mail->AltBody = $mail->html2text($message, true);
                     $mail->CharSet = "UTF-8";
-                    $mail->send();
+                    $mail->send(DEBUG_EMAILS && IS_LOCALHOST);
                 } catch (Exception $e) {}
             }
         }

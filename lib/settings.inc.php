@@ -52,8 +52,11 @@ foreach($ini_data as $key => $value) {
 
 ini_set('error_reporting', intval(PHP_ERROR_REPORTING));
 ini_set('display_errors', PHP_DISPLAY_ERRORS);
-date_default_timezone_set(SETTINGS_TIMEZONE);
+
+if (SETTINGS_TIMEZONE) {
+	date_default_timezone_set(SETTINGS_TIMEZONE);
+}
 
 unset($ini_data);
 
-require DOCUMENT_ROOT .'/lib//vendor/autoload.php';
+require './lib/vendor/autoload.php';

@@ -29,28 +29,6 @@ require_once (DOCUMENT_ROOT . '/lib/base.model.php');
 
 class Model_User extends Model_Base{
 
-    function get_user_list_with_recipes() {
-        $where = '';
-        if ($this->_user_id) {
-            $where = ' OR user_id = '. intval($this->_user_id);
-        }
-
-        $res = $this->_db->executeUnbufferedQuery('SELECT 
-            tbl_user.user_id as user_id,
-            tbl_user.user_name as user_name
-            FROM tbl_user
-            INNER JOIN tbl_recipe USING (user_id)
-            WHERE tbl_recipe.public = 1 ' . $where . '
-            ORDER BY tbl_user.user_name ASC;');
-
-        $row_list = $this->_db->getAssocResults();
-        $data = [];
-        foreach ($row_list as $row) {
-            $data[$row['user_id']] = $row['user_name'];
-        }
-        return $data;
-    }
-
     protected function _crypt_password($password) {
         return hash('sha512', SECURITY_SALT . $password . SECURITY_SALT . $password);
     }
@@ -65,7 +43,7 @@ class Model_User extends Model_Base{
         $user_token = create_user_token($this->_crypt_password($password),  $_SERVER['REMOTE_ADDR']);
         $db_token = $this->_calc_remember_token($user_token);
 
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'INSERT INTO tbl_user_remember (user_id, db_token, insert_timestamp) VALUES (?, ?, NOW());',
             [$this->_user_id, $db_token]
         );
@@ -74,7 +52,7 @@ class Model_User extends Model_Base{
 
     function removeRememberToken($user_token) {
         $db_token = $this->_calc_remember_token($user_token);
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'DELETE FROM tbl_user_remember WHERE db_token = ?;',
             [$db_token]
         );
@@ -82,7 +60,7 @@ class Model_User extends Model_Base{
 
     function loginRememberToken($user_token) {
         $db_token = $this->_calc_remember_token($user_token);
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'SELECT * FROM tbl_user WHERE user_id IN (SELECT user_id FROM tbl_user_remember WHERE db_token = ? AND insert_timestamp > NOW() - INTERVAL ? day);',
             [$db_token, SETTINGS_LOGIN_REMEMBER_EXPIRE]);
         if ($res) {
@@ -95,7 +73,7 @@ class Model_User extends Model_Base{
     }
 
     function get() {
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'SELECT * FROM tbl_user WHERE user_id = ?;',
             [$this->_user_id]);
         if ($res) {
@@ -111,7 +89,7 @@ class Model_User extends Model_Base{
         $email = strtolower($email);
 
         $cnt_bruteforce = 0;
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'SELECT count(*) as cnt FROM tbl_user_login_bruteforce WHERE LOWER(email) = ? AND insert_timestamp > NOW() - INTERVAL ? MINUTE;',
             [$email, SETTINGS_LOGIN_BRUTEFORCE_EXPIRE * 60]);
         if ($res) {
@@ -122,7 +100,7 @@ class Model_User extends Model_Base{
             }
         }
 
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'SELECT * FROM tbl_user WHERE email = ? AND password = ?;',
             [$email, $this->_crypt_password($password)]);
         if ($res) {
@@ -130,7 +108,7 @@ class Model_User extends Model_Base{
             if ($data) {
                 $this->setUserId($data['user_id']);
                 
-                $this->_db->executePreparedQuery(
+                $this->_db->executeQuery(
                     'DELETE FROM tbl_user_login_bruteforce WHERE email = ?;',
                     [$email]);
                     
@@ -138,7 +116,7 @@ class Model_User extends Model_Base{
             }
         }
 
-        $this->_db->executePreparedQuery(
+        $this->_db->executeQuery(
             'INSERT INTO tbl_user_login_bruteforce SET email = ?, insert_timestamp = NOW();',
             [$email]);
         
@@ -148,7 +126,7 @@ class Model_User extends Model_Base{
     }
 
     function create($user_name, $email, $password) {
-        return $this->_db->executePreparedQuery(
+        return $this->_db->executeQuery(
             'INSERT INTO tbl_user (user_name, email, password, last_edited) VALUES (?,?,?, NOW())',
             [$user_name, $email, $this->_crypt_password($password)]);
     }
@@ -158,14 +136,14 @@ class Model_User extends Model_Base{
 
         $email = strtolower($email);
 
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'SELECT user_id, user_name, email, password FROM tbl_user WHERE LOWER(email) = ?;',
             [$email]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             if ($data) {
 
-                $res = $this->_db->executePreparedQuery(
+                $res = $this->_db->executeQuery(
                     'SELECT count(*) as cnt FROM tbl_user_forgotten WHERE user_id = ? AND insert_timestamp > NOW() - INTERVAL ? MINUTE;',
                     [$data['user_id'], SETTINGS_FORGOTTEN_PASSWORD_EXPIRE]);
                 $data2 = $this->_db->fetchAssoc();
@@ -175,7 +153,7 @@ class Model_User extends Model_Base{
 
                 $user_token = create_user_token($data['password'],  $_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
                 $db_token = create_db_token($user_token, $_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
-                $res = $this->_db->executePreparedQuery(
+                $res = $this->_db->executeQuery(
                     'INSERT INTO tbl_user_forgotten (user_id, db_token, insert_timestamp) VALUES (?, ?, NOW());',
                     [$data['user_id'], $db_token]
                 );
@@ -188,7 +166,7 @@ class Model_User extends Model_Base{
     function forgotten_change($user_token, $password) {
 
         $db_token = create_db_token($user_token, $_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
                 password = ?,
                 last_edited = NOW(),
@@ -198,12 +176,12 @@ class Model_User extends Model_Base{
         if ($res) {
             if ($this->_db->getAffectedRows() == 1) {
 
-                $this->_db->executePreparedQuery(
+                $this->_db->executeQuery(
                     'DELETE FROM tbl_user_login_bruteforce WHERE email IN
                     (SELECT LOWER(email) FROM tbl_user WHERE user_id IN (SELECT user_id FROM tbl_user_forgotten WHERE db_token = ?));',
                     [$db_token]);
 
-                $this->_db->executePreparedQuery(
+                $this->_db->executeQuery(
                     'DELETE FROM tbl_user_forgotten WHERE db_token = ?;',
                     [$db_token]);
                     
@@ -214,7 +192,7 @@ class Model_User extends Model_Base{
     }
 
     function update_profile($user_name) {
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
                 user_name = ?,
                 last_edited = NOW(),
@@ -230,7 +208,7 @@ class Model_User extends Model_Base{
     }
 
     function update_email($actual_password, $email) {
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
                 email = ?,
                 last_edited = NOW(),
@@ -246,7 +224,7 @@ class Model_User extends Model_Base{
     }
 
     function update_password($actual_password, $password) {
-        $res = $this->_db->executePreparedQuery(
+        $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
                 password = ?,
                 last_edited = NOW(),
