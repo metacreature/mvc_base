@@ -84,7 +84,7 @@ class Controller_Base
     protected function _forbidden($is_forbidden) {
         if ($is_forbidden) {
             header('HTTP/1.0 403 Forbidden');
-            require_once(DOCUMENT_ROOT . '/crawler.html');
+            require_once(DOCUMENT_ROOT . '/403.html');
             exit;
         }
     }

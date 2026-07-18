@@ -48,10 +48,22 @@ function log_runtime() {
 	}
 }
 
+function my_ob_clean() {
+	if (!IS_LOCALHOST) {
+		@ob_clean();
+	}
+}
+
+function error_forbidden() {
+	header('HTTP/1.0 403 Forbidden');
+	require_once(DOCUMENT_ROOT . '/403.html');
+}
+
 // FW-Includes
 require_once ('lib/settings.inc.php');
 require_once ('lib/fw/func.inc.php');
 require_once ('lib/fw/FW_MySQLDataBaseLayer.class.php');
+require_once ('lib/fw/FW_Download.class.php');
 
 
 // database
@@ -66,18 +78,17 @@ $slashpos = strrpos($url, '/');
 // get controller and function
 $controller_request = substr($url, 0, $slashpos === false ? null : $slashpos);
 
-if ($url && preg_match('#^[a-z_\/]+$#', $url) && file_exists('controller/' . $url  . '.cont.php')) {
+if ($url && preg_match('#^[a-z0-9_\/]+$#', $url) && file_exists('controller/' . $url  . '.cont.php')) {
 	$controller_file = 'controller/' . $url;
 	$function = 'view';
-} elseif ($controller_request && preg_match('#^[a-z_\/]+$#', $controller_request) && file_exists('controller/' . $controller_request  . '.cont.php')) {
+} elseif ($controller_request && preg_match('#^[a-z0-9_\/]+$#', $controller_request) && file_exists('controller/' . $controller_request  . '.cont.php')) {
 	$controller_file = 'controller/' . $controller_request;
 	$function = $slashpos === false ? '' : substr($url, $slashpos + 1);
 } else if (!$controller_request) {
 	$controller_file = 'controller' . SETTINGS_LANDING_PAGE;
 	$function = 'view';
 } else {
-	header('HTTP/1.0 403 Forbidden');
-	require_once(DOCUMENT_ROOT . '/crawler.html');
+	error_forbidden();
 	log_runtime();
     exit;
 }
@@ -89,31 +100,39 @@ $controller_name = implode('_', array_map('ucfirst', preg_split('#[\/_]#', $cont
 @require_once($controller_file  . '.cont.php');
 $obj_controller = new $controller_name($db);
 
-if ($function && preg_match('#^[a-z_]+$#', $function) && method_exists($obj_controller, $function)) {
+if ($function && preg_match('#^[a-z0-9_]+$#', $function) && method_exists($obj_controller, $function)) {
 	ob_start();
 
 	$result = [$obj_controller, $function]();
 
-	if (is_string($result)) {
-		header('Location: ' . $result);
-	} elseif (is_array($result)) {
-		ob_clean();
-		header('Content-Type: application/json; charset=utf-8');
-		echo json_encode($result);
-		ob_end_flush();
-	} else {
+	if (is_null($result)) {
 		header('Expires: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 		header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 		header('Cache-Control: no-store, no-cache, must-revalidate');
 		header('Cache-Control: post-check=0, pre-check=0', false);
 		header('Pragma: no-cache');
 		ob_end_flush();
+	} else if (is_array($result)) {
+		my_ob_clean();
+		header('Content-Type: application/json; charset=utf-8');
+		echo json_encode($result);
+		ob_end_flush();
+	} else if (is_string($result)) {
+		my_ob_clean();
+		header('Location: ' . $result);
+	} else if ($result instanceof FW_Download) {
+		my_ob_clean();
+		if (!$result->send()) {
+			error_forbidden();
+		}
+	} else {
+		my_ob_clean();
+		error_forbidden();
 	}
 	log_runtime();
     exit;
 } else {
-	header('HTTP/1.0 403 Forbidden');
-	require_once(DOCUMENT_ROOT . '/crawler.html');
+	error_forbidden();
 	log_runtime();
     exit;
 }
