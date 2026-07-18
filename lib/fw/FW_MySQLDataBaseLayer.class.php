@@ -169,18 +169,19 @@ class FW_MySqlDataBaseLayer
     // ============ Query-Methods ============ //
 
     function executeQuery($sSQL, $data = null, $iRn = 0)
-    {
-        if (is_null($data)) {
-            $rRes = @$this->_rMySqli->query($sSQL, MySqlI_STORE_RESULT);
-        }  else {
-            $rRes = @$this->_rMySqli->execute_query($sSQL, $data);
-        }
-
-        if ($rRes !== false) {
-            $this->_arrResource[$iRn] = $rRes instanceof MySqli_result ? $rRes : null;
-            $this->_arrLog[] = $iRn . ' ' . $sSQL;
-            return true;
-        }
+    {   
+        try{
+            if (is_null($data)) {
+                $rRes = @$this->_rMySqli->query($sSQL, MySqlI_STORE_RESULT);
+            }  else {
+                $rRes = @$this->_rMySqli->execute_query($sSQL, $data);
+            }
+            if ($rRes !== false) {
+                $this->_arrResource[$iRn] = $rRes instanceof MySqli_result ? $rRes : null;
+                $this->_arrLog[] = $iRn . ' ' . $sSQL;
+                return true;
+            }
+        } catch (Exception $e) {}
 
         $sError = '<b>' . $iRn . ' ' . $sSQL . '
 		<br>(ERROR)' . $this->_rMySqli->error . '</b>';
@@ -191,13 +192,15 @@ class FW_MySqlDataBaseLayer
 
     function executeUnbufferedQuery($sSQL, $iRn = 0)
     {
-        $rRes = @$this->_rMySqli->query($sSQL, MySqlI_USE_RESULT);
+        try {
+            $rRes = @$this->_rMySqli->query($sSQL, MySqlI_USE_RESULT);
 
-        if ($rRes !== false) {
-            $this->_arrResource[$iRn] = $rRes instanceof MySqli_result ? $rRes : null;
-            $this->_arrLog[] = $iRn . ' ' . $sSQL;
-            return true;
-        }
+            if ($rRes !== false) {
+                $this->_arrResource[$iRn] = $rRes instanceof MySqli_result ? $rRes : null;
+                $this->_arrLog[] = $iRn . ' ' . $sSQL;
+                return true;
+            }
+        } catch (Exception $e) {}
 
         $sError = '<b>' . $iRn . ' ' . $sSQL . '
 		<br>(ERROR)' . $this->_rMySqli->error . '</b>';

@@ -33,25 +33,27 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 	<meta name="robots" content="noindex, nofollow">
-    <title><?php outT(LANG_PAGE_TITLE); ?></title>
+    <title><?php outLang(LANG_PAGE_TITLE); ?></title>
     
     <script>
-        const WEB_URL = "<?php outT(WEB_URL); ?>";
-        const WEB_DOMAIN = "<?php outT(WEB_DOMAIN); ?>";
-        const LANG_FORM_DEFAULT_ERROR = '<?php outT(LANG_FORM_DEFAULT_ERROR); ?>';
+        const WEB_URL = "<?php outLink(WEB_URL); ?>";
+        const WEB_DOMAIN = "<?php outLink(WEB_DOMAIN); ?>";
+        const LANG_FORM_DEFAULT_ERROR = "<?php outLangJS(LANG_FORM_DEFAULT_ERROR); ?>";
     </script>
 
     <?php if (IS_LOCALHOST) { ?>
 
         <link type="text/css" rel="stylesheet" href="/static/node_modules/bootstrap/dist/css/bootstrap.css">
         <link type="text/css" rel="stylesheet" href="/static/node_modules/bootstrap-icons/font/bootstrap-icons.min.css">
-        <link type="text/css" rel="stylesheet" href="/static/js/jquery_confirm/jquery-confirm.min.css" >
+        <link type="text/css" rel="stylesheet" href="/static/external_libs/jquery_confirm/jquery-confirm.min.css" >
+        <link type="text/css" rel="stylesheet" href="/static/external_libs/iconcaptcha.min.css" >
         <link type="text/css" rel="stylesheet" href="/static/css/font.css">
         <link type="text/css" rel="stylesheet" href="/static/css/main.css">
 
         <script src="/static/node_modules/jquery/dist/jquery.js"></script>
         <script src="/static/node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
-        <script src="/static/js/jquery_confirm/jquery-confirm.js"></script>
+        <script src="/static/external_libs/jquery_confirm/jquery-confirm.js"></script>
+        <script src="/static/external_libs/iconcaptcha.min.js"></script>
         <script src="/static/js/fw/fw_utils.js"></script>
         <script src="/static/js/fw/fw_ajax_form.js"></script>
         <script src="/static/js/fw/fw_ajax_form_button.js"></script>

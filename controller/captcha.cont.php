@@ -1,20 +1,20 @@
 <?php
 /*
- File: password.request.view.html
+ File: login.cont.php
  Copyright (c) 2025 Clemens K. (https://github.com/metacreature)
- 
+
  MIT License
- 
+
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in all
  copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,32 +23,30 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
 */
-?>
-<?php require_once (DOCUMENT_ROOT . '/views/includes/header.view.html'); ?>
-<?php require_once (DOCUMENT_ROOT . '/views/includes/navigation.view.html'); ?>
-<?php require_once (DOCUMENT_ROOT . '/views/includes/captcha.view.html'); ?>
 
-<div class="center_box_user">
-    <div class="row justify-content-end">
-        <div class="col-sm-8 ">
-            <h3><?php outLang(LANG_PASSWORD_REQUEST_HDL); ?></h3>
-        </div>
-    </div>
-				
-    <?php 
-    $form->setColBehavior(4,8, 'sm');
-    $form->outStartTag();
-    $form->outMsg();
-    $form->outLine('email', LANG_FIELD_USER_EMAIL);
-    outCaptcha(4,8, 'sm');
-    $form->outSubmitLine(LANG_PASSWORD_REQUEST_BUTTON, 'save', '/user/password/request_submit');
-    $form->outEndTag();
-    ?>
 
-</div>
+require_once (DOCUMENT_ROOT . '/lib/base.cont.php');
 
-<script>
-    $('.forgotten_form').ajax_form({'default_error': LANG_FORM_DEFAULT_ERROR});
-</script>
+class Controller_Captcha extends Controller_Base
+{
+    function __construct($db) {
+        $this->_forbidden(!SECURITY_ENABLE_CAPTCHA);
+        parent::__construct($db);
+    }
 
-<?php require_once (DOCUMENT_ROOT . '/views/includes/footer.view.html'); ?>
+    function view() {
+        try {
+            $options = require DOCUMENT_ROOT . '/lib/captcha.ini.php';
+
+            $captcha = new \IconCaptcha\IconCaptcha($options);
+            $captcha->handleCors();
+            $captcha->request()->process();
+
+            http_response_code(400);
+        } catch (Throwable $exception) {
+            http_response_code(500);
+        }
+        
+        exit;
+    }
+}

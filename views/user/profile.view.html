@@ -32,7 +32,7 @@
     <div class="mb-5">
         <div class="row justify-content-end">
             <div class="col-sm-8 ">
-                <h3><?php outT(LANG_PROFILE_DATA_HDL); ?></h3>
+                <h3><?php outLang(LANG_PROFILE_DATA_HDL); ?></h3>
             </div>
         </div>
 
@@ -49,7 +49,7 @@
     <div class="mb-5">
         <div class="row justify-content-end">
             <div class="col-sm-8 ">
-                <h3><?php outT(LANG_PROFILE_EMAIL_HDL); ?></h3>
+                <h3><?php outLang(LANG_PROFILE_EMAIL_HDL); ?></h3>
             </div>
         </div>
 
@@ -67,7 +67,7 @@
     <div>
         <div class="row justify-content-end">
             <div class="col-sm-8 ">
-                <h3><?php outT(LANG_PROFILE_PASSWORD_HDL); ?></h3>
+                <h3><?php outLang(LANG_PROFILE_PASSWORD_HDL); ?></h3>
             </div>
         </div>
 
@@ -91,13 +91,11 @@
     $('.profile_form').ajax_form({
         'default_error': LANG_FORM_DEFAULT_ERROR,
         success: function(){
-            $('#header .user_name span').html($('.profile_form #user_name').val());
+            $('nav.navbar .user_name span').html($('.profile_form #user_name').val());
         }
     });
     $('.email_form, .password_form').ajax_form({'default_error': LANG_FORM_DEFAULT_ERROR});
-    $('.generate_password').click(function(e) {
-        clickGenPassword(e, '<?php outT(LANG_GENEERATE_PASSWORD_POPUP_TITLE); ?>', '<?php outT(LANG_GENEERATE_PASSWORD_POPUP_TEXT); ?>', '<?php outT(LANG_GENEERATE_PASSWORD_POPUP_BUTTON); ?>');
-    });
 </script>
 
+<?php require_once (DOCUMENT_ROOT . '/views/includes/genpassword.view.html'); ?>
 <?php require_once (DOCUMENT_ROOT . '/views/includes/footer.view.html'); ?>

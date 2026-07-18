@@ -26,11 +26,21 @@ define('LANG_FORMFIELD_ERRORS', array(
 define('LANG_FORM_INVALID', 'Bitte überprüfen Sie ihre Eingabe!');
 define('LANG_FORM_DEFAULT_ERROR', 'Es ist ein Fehler aufgetreten! Bitte versuche es später noch einmal!');
 
+define('LANG_CAPTCHA_INVALID', 'Das Captcha wurde nicht gelöst!');
+define('LANG_CAPTCHA_VERIFY', 'Sind Sie ein Mensch?');
+define('LANG_CAPTCHA_LOADING', 'Lade die Aufgabe ...');
+define('LANG_CAPTCHA_CHALLANGE', 'Wählen Sie das Bild aus, das am <u>seltensten</u> gezeigt wird');
+define('LANG_CAPTCHA_SUCCESS', 'Sie sind ein Mensch!');
+define('LANG_CAPTCHA_ERROR_HDL', 'Falsch');
+define('LANG_CAPTCHA_ERROR_TEXT', 'Sie haben das falsche Bild gewählt!');
+define('LANG_CAPTCHA_TIMEOUT_HDL', 'Bitte warten ...');
+define('LANG_CAPTCHA_TIMEOUT_TEXT', 'Sie hatten zu viele Fehlversuche!');
+
 define('LANG_FIELD_USER_USERNAME', 'Benutzername');
 define('LANG_FIELD_USER_EMAIL', 'E-Mail');
 define('LANG_FIELD_USER_PASSWORD', 'Passwort');
 define('LANG_FIELD_USER_PASSWORD_ERROR', 'Passwort muß mindestens je einen Großbuchstaben, Kleinbuchstaben, Zahl und Sonderzeichen haben!');
-define('LANG_FIELD_USER_REPEAT_PASSWORD', 'Passwort wiederholen');
+define('LANG_FIELD_USER_REPEAT_PASSWORD', 'Passwort nochmal');
 define('LANG_FIELD_USER_REPEAT_PASSWORD_ERROR', 'Passwort nicht identisch!');
 define('LANG_FIELD_USER_ACTUAL_PASSWORD', 'Aktuelles Passwort');
 define('LANG_GENEERATE_PASSWORD_BUTTON', 'Passwort generieren');

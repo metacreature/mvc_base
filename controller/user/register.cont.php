@@ -55,6 +55,9 @@ class Controller_User_Register extends Controller_Base
         $form = $this->_get_form();
         $form->resolveRequest();
         if ($this->_validate_create_password_form($form)) {
+            if (!$this->_validateCaptcha($_POST)) {
+                return $form->getFormError(LANG_CAPTCHA_INVALID); 
+            }
             $user_obj = new Model_User($this->_db, 0);
             $res = $user_obj->create(
                 $form->getValue('user_name'),
@@ -63,7 +66,7 @@ class Controller_User_Register extends Controller_Base
             if ($res) {
                 return $form->getFormSuccess(LANG_REGISTER_SUCCESS);
             } 
-            return $form->getFormError(LANG_REGISTER_FAIL_EMAIL);
+            return $form->getFormError(LANG_REGISTER_FAIL_EMAIL, array('captcha_reset' => true));
         } 
         return $form->getFormError(LANG_FORM_INVALID); 
     }

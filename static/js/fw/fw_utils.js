@@ -210,7 +210,7 @@ function generatePassword(length) {
 	let charset_lowercase = 'abcdefghijklmnopqrstuvwxyz';
 	let charset_uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	let charset_number = '01234567890123456789';
-	let charset_special = '!"<>-_.,;:#*+~|§$%&/()=?';
+	let charset_special = '![]{}<>-_.,;:#*+~|@^$%&/()=?';
 	let charset = shuffleString(shuffleString(charset_lowercase + charset_uppercase + charset_special + charset_number));
 
 	let password = '';

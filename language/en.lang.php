@@ -26,6 +26,16 @@ define('LANG_FORMFIELD_ERRORS', array(
 define('LANG_FORM_INVALID', 'Please evaluate your input!');
 define('LANG_FORM_DEFAULT_ERROR', 'Something went wrong! Please try it again later!');
 
+define('LANG_CAPTCHA_INVALID', 'The captcha wasn\'t solved!');
+define('LANG_CAPTCHA_VERIFY', 'Are you human?');
+define('LANG_CAPTCHA_LOADING', 'Loading challenge...');
+define('LANG_CAPTCHA_CHALLANGE', 'Select the image displayed the <u>least</u> amount of times');
+define('LANG_CAPTCHA_SUCCESS', 'You are human!');
+define('LANG_CAPTCHA_ERROR_HDL', 'Wrong');
+define('LANG_CAPTCHA_ERROR_TEXT', 'You\'ve selected the wrong image.');
+define('LANG_CAPTCHA_TIMEOUT_HDL', 'Please wait.');
+define('LANG_CAPTCHA_TIMEOUT_TEXT', 'You made too many incorrect selections.');
+
 define('LANG_FIELD_USER_USERNAME', 'Username');
 define('LANG_FIELD_USER_EMAIL', 'E-Mail');
 define('LANG_FIELD_USER_PASSWORD', 'Password');

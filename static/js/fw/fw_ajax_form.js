@@ -162,65 +162,69 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 		form.find(".ajax-form-response").html('<div class="ajax-form-error alert alert-danger">'+error_message+'</div>').show();
 		button.removeClass("btn-loading");
 		
-	} else if (data.success && data.redirect_url) {
-		if(data.message) {
-			var key = form.data('name')+'__'+data.redirect_url;
-			var form_messages = {};
-			form_messages[key] = data.message;
-			sessionStorage.setItem('form_messages', JSON.stringify(form_messages));
-		}
-        document.location.replace(data.redirect_url);
-    } else if (data.success) {
-		if (settings.success) {
-			settings.success(form, button, data);
-		}
-		if(data.message) {
-			form.find(".ajax-form-response").html('<div class="ajax-form-success alert alert-success">'+data.message+'</div>').show();
-			ajax_form_scrolltop();
-		}
-		form.find(".ajax-form-success-hide").hide();
-	} else if (data.warning) {
-		if (settings.warning) {
-			settings.warning(form, button, data);
-		}
-		if(data.message) {
-			form.find(".ajax-form-response").html('<div class="ajax-form-warning alert alert-warning">'+data.message+'</div>').show();
-			ajax_form_scrolltop();
-		}
-		form.find(".ajax-form-warning-hide").hide();
 	} else {
-		if (settings.error) {
-			settings.error(form, button, data);
+		if (data.captcha_reset) {
+			IconCaptcha.reset();
 		}
-		var i, field, error;
-		var error_list = data.field_errors || data.errors;
-		if (!is_empty(error_list)) {
-			for ( i in error_list ) {
-				field = form.find('[name="' + i + '"]').first();
-				if (!field.attr('name')) {
-					field = form.find('[name="' + i + '[]"]').first();
-				}
-				if (field.attr('type') == 'hidden') {
-					continue;
-				}
-				field.addClass("field-error").closest(".field-line").addClass("line-error");
-				if (error_list[i] !== true) {
-					line_class = field.closest(".field-wrapper").attr('class').match(/col-[a-z]+-[0-9]+/);
-					error = typeof error_list[i] == 'string' ? error_list[i] : error_list[i][0]
-					field.closest(".field-line").prepend('<span class="field-error-msg '+line_class+'">'+error+'</span><div class="field-error-msg-spacer"></div>');
-				}
+		if (data.success && data.redirect_url) {
+			if(data.message) {
+				var key = form.data('name')+'__'+data.redirect_url;
+				var form_messages = {};
+				form_messages[key] = data.message;
+				sessionStorage.setItem('form_messages', JSON.stringify(form_messages));
 			}
-			field = form.find('.line-error [name]');
-			field.first().focus();
-		}
-		if (data.message) {
-			form.find(".ajax-form-response").html('<div class="ajax-form-error alert alert-danger">'+data.message+'</div>').show();
-			if (!field || field.length == 0) {
+			document.location.replace(data.redirect_url);
+		} else if (data.success) {
+			if (settings.success) {
+				settings.success(form, button, data);
+			}
+			if(data.message) {
+				form.find(".ajax-form-response").html('<div class="ajax-form-success alert alert-success">'+data.message+'</div>').show();
 				ajax_form_scrolltop();
+			}
+			form.find(".ajax-form-success-hide").hide();
+		} else if (data.warning) {
+			if (settings.warning) {
+				settings.warning(form, button, data);
+			}
+			if(data.message) {
+				form.find(".ajax-form-response").html('<div class="ajax-form-warning alert alert-warning">'+data.message+'</div>').show();
+				ajax_form_scrolltop();
+			}
+			form.find(".ajax-form-warning-hide").hide();
+		} else {
+			if (settings.error) {
+				settings.error(form, button, data);
+			}
+			var i, field, error;
+			var error_list = data.field_errors || data.errors;
+			if (!is_empty(error_list)) {
+				for ( i in error_list ) {
+					field = form.find('[name="' + i + '"]').first();
+					if (!field.attr('name')) {
+						field = form.find('[name="' + i + '[]"]').first();
+					}
+					if (field.attr('type') == 'hidden') {
+						continue;
+					}
+					field.addClass("field-error").closest(".field-line").addClass("line-error");
+					if (error_list[i] !== true) {
+						line_class = field.closest(".field-wrapper").attr('class').match(/col-[a-z]+-[0-9]+/);
+						error = typeof error_list[i] == 'string' ? error_list[i] : error_list[i][0]
+						field.closest(".field-line").prepend('<span class="field-error-msg '+line_class+'">'+error+'</span><div class="field-error-msg-spacer"></div>');
+					}
+				}
+				field = form.find('.line-error [name]');
+				field.first().focus();
+			}
+			if (data.message) {
+				form.find(".ajax-form-response").html('<div class="ajax-form-error alert alert-danger">'+data.message+'</div>').show();
+				if (!field || field.length == 0) {
+					ajax_form_scrolltop();
+				}
 			}
 		}
 	}
-	
 	button.removeClass("btn-loading");
 	form.data('is_submitting', false);
 }

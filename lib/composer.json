@@ -1,6 +1,7 @@
 {
     "require": {
         "phpmailer/phpmailer": "^7.1",
-        "soundasleep/html2text": "^2.1.0"
+        "soundasleep/html2text": "^2.1.0",
+        "fabianwennink/iconcaptcha": "^4.0"
     }
 }

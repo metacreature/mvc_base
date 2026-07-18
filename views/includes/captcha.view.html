@@ -1,0 +1,51 @@
+<?php
+	function outCaptcha($iLabel = 4, $iField = 8, $sBreak = 'md') {
+		if (SECURITY_ENABLE_CAPTCHA) {
+?>
+
+<div class="row mb-3 justify-content-end">
+    <div class="col-<?php outT($sBreak.'-'.$iField); ?>">	
+		<div class="iconcaptcha-widget" data-theme="light"></div>
+   		<?php outHTML(\IconCaptcha\Token\IconCaptchaToken::render()); ?>
+	</div>
+</div>
+<script>
+	$(function() {
+		$('.iconcaptcha-widget').iconCaptcha({
+			general: {
+				endpoint: '/captcha',
+				fontFamily: 'inherit',
+				showCredits: true,
+			},
+			security: {
+				interactionDelay: 1500,
+				hoverProtection: true,
+				displayInitialMessage: true,
+				initializationDelay: 500,
+				incorrectSelectionResetDelay: 3000,
+				loadingAnimationDuration: 1000,
+			},
+			locale: {
+				initialization: {
+					verify: "<?php outLangJS(LANG_CAPTCHA_VERIFY); ?>",
+					loading: "<?php outLangJS(LANG_CAPTCHA_LOADING); ?>",
+				},
+				header: '<?php outLangJS(LANG_CAPTCHA_CHALLANGE); ?>',
+				correct: "<?php outLangJS(LANG_CAPTCHA_SUCCESS); ?>",
+				incorrect: {
+					title: "<?php outLangJS(LANG_CAPTCHA_ERROR_HDL); ?>",
+					subtitle: "<?php outLangJS(LANG_CAPTCHA_ERROR_TEXT); ?>",
+				},
+				timeout: {
+					title: "<?php outLangJS(LANG_CAPTCHA_TIMEOUT_HDL); ?>",
+					subtitle: "<?php outLangJS(LANG_CAPTCHA_TIMEOUT_TEXT); ?>"
+				}
+			}
+		});
+	});
+</script>
+
+<?php
+		}
+	}
+?>

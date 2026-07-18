@@ -35,10 +35,10 @@
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav">
 				<li class="nav-item d-none">
-					<a class="nav-link" href="/"><?php outT(LANG_NAVIGATION_HOME); ?></a>
+					<a class="nav-link" href="/"><?php outLang(LANG_NAVIGATION_HOME); ?></a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" href="#"><?php outT(LANG_DUMMY); ?></a>
+					<a class="nav-link" href="#"><?php outLang(LANG_DUMMY); ?></a>
 				</li>
 			</ul>
 		</div>
@@ -50,7 +50,7 @@
 		if (Controller_Base::is_login()) { 
 ?>
 			<li class="nav-item">
-				<a class="nav-link icon-link" href="/user/profile" title="<?php outT(Controller_Base::get_user_name()); ?>">
+				<a class="nav-link icon-link user_name" href="/user/profile" title="<?php outT(Controller_Base::get_user_name()); ?>">
 					<svg class="bi">
 						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#person-circle"></use>
 					</svg>
@@ -63,7 +63,7 @@
 					<svg class="bi">
 						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#box-arrow-right"></use>
 					</svg>
-					<span><?php outT(LANG_NAVIGATION_LOGOUT); ?></span>
+					<span><?php outLang(LANG_NAVIGATION_LOGOUT); ?></span>
 				</a>
 			</li>
 
@@ -76,7 +76,7 @@
 					<svg class="bi">
 						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#person-plus"></use>
 					</svg>
-					<span><?php outT(LANG_NAVIGATION_REGISTER); ?></span>
+					<span><?php outLang(LANG_NAVIGATION_REGISTER); ?></span>
 				</a>
 			</li>
 
@@ -88,7 +88,7 @@
 					<svg class="bi">
 						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#person"></use>
 					</svg>
-					<span><?php outT(LANG_NAVIGATION_LOGIN); ?></span>
+					<span><?php outLang(LANG_NAVIGATION_LOGIN); ?></span>
 				</a>
 			</li>
 
@@ -138,19 +138,19 @@
 				<li>
 					<button type="button" class="dropdown-item icon-link" data-bs-theme-value="light" aria-pressed="false">
 						<svg class="bi theme-icon"><use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#sun-fill"></use></svg>
-						<span><?php outT(LANG_NAVIGATION_LAYOUT_LIGHT); ?></span>
+						<span><?php outLang(LANG_NAVIGATION_LAYOUT_LIGHT); ?></span>
 					</button>
 				</li>
 				<li>
 					<button type="button" class="dropdown-item icon-link" data-bs-theme-value="dark" aria-pressed="false">
 						<svg class="bi theme-icon"><use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#moon-stars-fill"></use></svg>
-						<span><?php outT(LANG_NAVIGATION_LAYOUT_DARK); ?></span>
+						<span><?php outLang(LANG_NAVIGATION_LAYOUT_DARK); ?></span>
 					</button>
 				</li>
 				<li>
 					<button type="button" class="dropdown-item icon-link" data-bs-theme-value="auto" aria-pressed="false">
 						<svg class="bi theme-icon"><use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#circle-half"></use></svg>
-						<span><?php outT(LANG_NAVIGATION_LAYOUT_AUTO); ?></span>
+						<span><?php outLang(LANG_NAVIGATION_LAYOUT_AUTO); ?></span>
 					</button>
 				</li>
 				</ul>

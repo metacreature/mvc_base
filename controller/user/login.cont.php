@@ -74,12 +74,7 @@ class Controller_User_Login extends Controller_Base
     }
 
     function logout() {
-        if (!empty($_COOKIE['remember_token'])) {
-            $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
-            $user_obj->removeRememberToken($_COOKIE['remember_token']);
-            setcookie("remember_token", '', 1, "/", WEB_DOMAIN);
-        }
-        @session_destroy();
+        $this->_logout();
         return WEB_URL . '?logout';
     }
 }

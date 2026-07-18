@@ -18,7 +18,7 @@ CREATE TABLE tbl_user_remember(
   insert_timestamp  DATETIME NOT NULL,
   FOREIGN KEY (user_id) REFERENCES tbl_user (user_id),
   INDEX db_token (db_token(10))
-) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL;
+) CHARACTER SET ascii COLLATE ascii_general_ci;
 
 CREATE TABLE tbl_user_forgotten(
   user_id INT UNSIGNED NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE tbl_user_forgotten(
   insert_timestamp  DATETIME NOT NULL,
   FOREIGN KEY (user_id) REFERENCES tbl_user (user_id),
   INDEX db_token (db_token(10))
-) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL;
+) CHARACTER SET ascii COLLATE ascii_general_ci;
 
 CREATE TABLE tbl_user_login_bruteforce(
   email VARCHAR(255) NOT NULL,

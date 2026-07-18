@@ -65,6 +65,9 @@ class Controller_User_Password extends Controller_Base
         if (!$this->_validate_create_password_form($form)) {
             return $form->getFormError(LANG_FORM_INVALID);
         }
+        if (!$this->_validateCaptcha($_POST)) {
+            return $form->getFormError(LANG_CAPTCHA_INVALID); 
+        }
 
         usleep(rand(2154755, 6367810));
 
@@ -87,36 +90,40 @@ class Controller_User_Password extends Controller_Base
         $form = $this->_get_forgotten_form();
         $form->resolveRequest();
 
+        if (!$form->validate($form)) {
+            return $form->getFormError(LANG_FORM_INVALID);
+        }
+        if (!$this->_validateCaptcha($_POST)) {
+            return $form->getFormError(LANG_CAPTCHA_INVALID); 
+        }
+        
         usleep(rand(2154755, 6367810));
 
-        if ($form->validate($form)) {
-            $user_obj = new Model_User($this->_db, 0);
-            $data = $user_obj->forgotten($form->getValue('email'));
-            if ($data) {
+        $user_obj = new Model_User($this->_db, 0);
+        $data = $user_obj->forgotten($form->getValue('email'));
+        if ($data) {
 
-                $change_url = WEB_URL . '/user/password/change?token=' .$data['user_token'];         
-                $user_name = $data['user_name'];
+            $change_url = WEB_URL . '/user/password/change?token=' .$data['user_token'];         
+            $user_name = $data['user_name'];
 
-                require_once (DOCUMENT_ROOT . '/emails/password.request.email.'.SELECTED_LANG.'.html');
-                $message = ob_get_contents();
-                ob_clean();
+            require_once (DOCUMENT_ROOT . '/emails/password.request.email.'.SELECTED_LANG.'.html');
+            $message = ob_get_contents();
+            ob_clean();
 
-                try {
-                    $mail = new FW_Email();
-                    $mail->setLanguage(SELECTED_LANG);
-                    $mail->From = EMAIL_FROM_MAIL;
-                    $mail->FromName = EMAIL_FROM_NAME;
-                    $mail->addAddress($data['email']);
-                    $mail->isHTML(true);
-                    $mail->Subject = LANG_PASSWORD_REQUEST_SUBJECT;
-                    $mail->Body = $message;
-                    $mail->AltBody = $mail->html2text($message, true);
-                    $mail->CharSet = "UTF-8";
-                    $mail->send(DEBUG_EMAILS && IS_LOCALHOST);
-                } catch (Exception $e) {}
-            }
+            try {
+                $mail = new FW_Email();
+                $mail->setLanguage(SELECTED_LANG);
+                $mail->From = EMAIL_FROM_MAIL;
+                $mail->FromName = EMAIL_FROM_NAME;
+                $mail->addAddress($data['email']);
+                $mail->isHTML(true);
+                $mail->Subject = LANG_PASSWORD_REQUEST_SUBJECT;
+                $mail->Body = $message;
+                $mail->AltBody = $mail->html2text($message, true);
+                $mail->CharSet = "UTF-8";
+                $mail->send(DEBUG_EMAILS && IS_LOCALHOST);
+            } catch (Exception $e) {}
         }
         return $form->getFormSuccess(LANG_PASSWORD_REQUEST_SUCCESS);
-        
     }
 }

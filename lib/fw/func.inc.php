@@ -41,9 +41,24 @@ function outHtml($sString) {
         echo $sString;
     }
 }
+function outLang($sString) {
+    if (!is_null($sString)) {
+        echo $sString;
+    }
+}
 function outLink($sString) {
     if (!is_null($sString)) {
-        echo str_replace('&amp;', '&', htmlspecialchars($sString, ENT_COMPAT, 'UTF-8'));
+    	echo str_replace('&amp;', '&', htmlspecialchars($sString, ENT_QUOTES, 'UTF-8'));
+    }
+}
+function outJS($sString) {
+    if (!is_null($sString)) {
+        echo str_replace(array('&quot;', '&#039;'), array('\\"', "\\'"), htmlspecialchars($sString, ENT_QUOTES, 'UTF-8'));
+    }
+}
+function outLangJS($sString) {
+    if (!is_null($sString)) {
+        echo str_replace(array('"', "'"), array('\\"', "\\'"), $sString);
     }
 }
 

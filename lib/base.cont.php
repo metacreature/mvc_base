@@ -26,7 +26,7 @@
 
 
 require_once ('fw/FW_Ajax_Form.class.php');
-require_once ('languagelist.php');
+require_once ('languagelist.inc.php');
 
 class Controller_Base
 {
@@ -89,6 +89,16 @@ class Controller_Base
         }
     }
 
+    protected function _logout() {
+        if (!empty($_COOKIE['remember_token'])) {
+            $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
+            $user_obj->removeRememberToken($_COOKIE['remember_token']);
+            setcookie("remember_token", '', 1, "/", WEB_DOMAIN);
+        }
+        @session_destroy();
+        $this->_sessionStart();
+    }
+
     private function _sessionStart() {
         $ip = SECURITY_LOGIN_USE_IP ? $_SERVER['REMOTE_ADDR'] : '';
         $user_agent = SECURITY_LOGIN_USE_USER_AGENT ? $_SERVER['HTTP_USER_AGENT'] : '';
@@ -99,15 +109,15 @@ class Controller_Base
         $_SESSION['session_started'] = true;
     }
 
-    static function is_login() {
+    protected static function is_login() {
         return !empty($_SESSION) && !empty($_SESSION['login']);
     }
 
-    static function get_user_id() {
+    protected static function get_user_id() {
         return !empty($_SESSION) && !empty($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
     }
     
-    static function get_user_name() {
+    protected static function get_user_name() {
         return !empty($_SESSION) && !empty($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
     }
 
@@ -159,7 +169,14 @@ class Controller_Base
         return $valid;
     }
 
-    protected function _logout() {
-        @session_destroy();
+    protected function _validateCaptcha($data) {
+        if (!SECURITY_ENABLE_CAPTCHA) {
+            return true;
+        }
+
+        $options = require DOCUMENT_ROOT . '/lib/captcha.ini.php';
+        $captcha = new \IconCaptcha\IconCaptcha($options);
+
+        return $captcha->validate($data)->success() ? true : false;
     }
 }

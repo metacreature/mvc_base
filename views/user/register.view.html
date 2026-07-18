@@ -26,12 +26,13 @@
 ?>
 <?php require_once (DOCUMENT_ROOT . '/views/includes/header.view.html'); ?>
 <?php require_once (DOCUMENT_ROOT . '/views/includes/navigation.view.html'); ?>
+<?php require_once (DOCUMENT_ROOT . '/views/includes/captcha.view.html'); ?>
 
 
 <div class="center_box_user">
     <div class="row justify-content-end">
         <div class="col-sm-8 ">
-            <h3><?php outT(LANG_REGISTER_HDL); ?></h3>
+            <h3><?php outLang(LANG_REGISTER_HDL); ?></h3>
         </div>
     </div>
 				
@@ -45,6 +46,7 @@
     $form->outLine('password', LANG_FIELD_USER_PASSWORD);
     $form->outLine('password_confirmation', LANG_FIELD_USER_REPEAT_PASSWORD);
     $form->outButtonLine(LANG_GENEERATE_PASSWORD_BUTTON, 'generate_password btn-primary');
+    outCaptcha(4,8, 'sm');
     $form->outSubmitLine(LANG_REGISTER_SAVE, 'save', '/user/register/save');
     $form->outEndTag();
     ?>
@@ -60,10 +62,7 @@
             }
         }
     });
-
-    $('.generate_password').click(function(e) {
-        clickGenPassword(e, '<?php outT(LANG_GENEERATE_PASSWORD_POPUP_TITLE); ?>', '<?php outT(LANG_GENEERATE_PASSWORD_POPUP_TEXT); ?>', '<?php outT(LANG_GENEERATE_PASSWORD_POPUP_BUTTON); ?>');
-    });
 </script>
 
+<?php require_once (DOCUMENT_ROOT . '/views/includes/genpassword.view.html'); ?>
 <?php require_once (DOCUMENT_ROOT . '/views/includes/footer.view.html'); ?>
