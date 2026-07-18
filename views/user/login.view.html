@@ -38,7 +38,7 @@
     $form->setColBehavior(4,8, 'sm');
     $form->outStartTag();
     $form->outMsg();
-    $form->outLine('email', LANG_FIELD_USER_EMAIL, ['autocomplete' => 'on']);
+    $form->outLine('user_email', LANG_FIELD_USER_EMAIL, ['autocomplete' => 'on']);
     $form->outLine('password', LANG_FIELD_USER_PASSWORD, ['autocomplete' => 'on']);
     if (SETTINGS_LOGIN_REMEMBER_ENABLED) {
         $form->outCheckboxLine('remember_login', LANG_LOGIN_REMEMBER_LOGIN); 

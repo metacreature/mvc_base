@@ -40,7 +40,7 @@ class Controller_User_Password_Request extends Controller_Base
     protected function _get_form() {
         $form = new FW_Ajax_Form('forgotten_form', false);
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
-        $form->addField('Email', 'email', true);
+        $form->addField('Email', 'user_email', true);
         return $form;
     }
 
@@ -64,7 +64,7 @@ class Controller_User_Password_Request extends Controller_Base
         usleep(rand(2154755, 6367810));
 
         $user_obj = new Model_User($this->_db, 0);
-        $data = $user_obj->forgotten($form->getValue('email'));
+        $data = $user_obj->forgotten($form->getValue('user_email'));
         if ($data) {
 
             $change_url = WEB_URL . '/user/password/change?token=' .$data['user_token'];         
@@ -79,7 +79,7 @@ class Controller_User_Password_Request extends Controller_Base
                 $mail->setLanguage(SELECTED_LANG);
                 $mail->From = EMAIL_FROM_MAIL;
                 $mail->FromName = EMAIL_FROM_NAME;
-                $mail->addAddress($data['email']);
+                $mail->addAddress($data['user_email']);
                 $mail->isHTML(true);
                 $mail->Subject = LANG_PASSWORD_REQUEST_SUBJECT;
                 $mail->Body = $message;

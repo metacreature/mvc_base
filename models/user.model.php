@@ -84,14 +84,14 @@ class Model_User extends Model_Base{
         }
     }
 
-    function login($email, $password, $as_admin = false) {
+    function login($user_email, $password, $as_admin = false) {
 
-        $email = strtolower($email);
+        $user_email = strtolower($user_email);
 
         $cnt_bruteforce = 0;
         $res = $this->_db->executeQuery(
-            'SELECT count(*) as cnt FROM tbl_user_login_bruteforce WHERE LOWER(email) = ? AND insert_timestamp > NOW() - INTERVAL ? MINUTE;',
-            [$email, SETTINGS_LOGIN_BRUTEFORCE_EXPIRE * 60]);
+            'SELECT count(*) as cnt FROM tbl_user_login_bruteforce WHERE LOWER(user_email) = ? AND insert_timestamp > NOW() - INTERVAL ? MINUTE;',
+            [$user_email, SETTINGS_LOGIN_BRUTEFORCE_EXPIRE * 60]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             $cnt_bruteforce = $data['cnt'];
@@ -102,8 +102,8 @@ class Model_User extends Model_Base{
 
         $sql_admin = $as_admin ? ' AND is_admin = 1 ' : '';
         $res = $this->_db->executeQuery(
-            'SELECT * FROM tbl_user WHERE email = ? AND password = ? '.$sql_admin.';',
-            [$email, $this->_crypt_password($password)]);
+            'SELECT * FROM tbl_user WHERE user_email = ? AND password = ? '.$sql_admin.';',
+            [$user_email, $this->_crypt_password($password)]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             if ($data) {
@@ -121,36 +121,36 @@ class Model_User extends Model_Base{
                 $data['login'] = true;
 
                 $this->_db->executeQuery(
-                    'DELETE FROM tbl_user_login_bruteforce WHERE email = ?;',
-                    [$email]);
+                    'DELETE FROM tbl_user_login_bruteforce WHERE user_email = ?;',
+                    [$user_email]);
                     
                 return $data;
             }
         }
 
         $this->_db->executeQuery(
-            'INSERT INTO tbl_user_login_bruteforce SET email = ?, insert_timestamp = NOW();',
-            [$email]);
+            'INSERT INTO tbl_user_login_bruteforce SET user_email = ?, insert_timestamp = NOW();',
+            [$user_email]);
         
         if ($cnt_bruteforce + 1 >= SETTINGS_LOGIN_BRUTEFORCE_CNT) {
             return false;
         }
     }
 
-    function create($user_name, $email, $password) {
+    function create($user_name, $user_email, $password) {
         return $this->_db->executeQuery(
-            'INSERT INTO tbl_user (user_name, email, password, insert_timestamp, update_timestamp) VALUES (?,?,?, NOW(), NOW())',
-            [$user_name, $email, $this->_crypt_password($password)]);
+            'INSERT INTO tbl_user (user_name, user_email, password, insert_timestamp, update_timestamp) VALUES (?,?,?, NOW(), NOW())',
+            [$user_name, $user_email, $this->_crypt_password($password)]);
     }
 
     
-    function forgotten($email) {
+    function forgotten($user_email) {
 
-        $email = strtolower($email);
+        $user_email = strtolower($user_email);
 
         $res = $this->_db->executeQuery(
-            'SELECT user_id, user_name, email, password FROM tbl_user WHERE LOWER(email) = ?;',
-            [$email]);
+            'SELECT user_id, user_name, user_email, password FROM tbl_user WHERE LOWER(user_email) = ?;',
+            [$user_email]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             if ($data) {
@@ -189,8 +189,8 @@ class Model_User extends Model_Base{
             if ($this->_db->getAffectedRows() == 1) {
 
                 $this->_db->executeQuery(
-                    'DELETE FROM tbl_user_login_bruteforce WHERE email IN
-                    (SELECT LOWER(email) FROM tbl_user WHERE user_id IN (SELECT user_id FROM tbl_user_forgotten WHERE db_token = ?));',
+                    'DELETE FROM tbl_user_login_bruteforce WHERE user_email IN
+                    (SELECT LOWER(user_email) FROM tbl_user WHERE user_id IN (SELECT user_id FROM tbl_user_forgotten WHERE db_token = ?));',
                     [$db_token]);
 
                 $this->_db->executeQuery(
@@ -219,14 +219,14 @@ class Model_User extends Model_Base{
         return false;
     }
 
-    function update_email($actual_password, $email) {
+    function update_email($actual_password, $user_email) {
         $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
-                email = ?,
+                user_email = ?,
                 update_timestamp = NOW(),
                 cnt_update = cnt_update + 1
             WHERE user_id = ? AND password = ?;',
-            [$email, $this->_user_id, $this->_crypt_password($actual_password)]);
+            [$user_email, $this->_user_id, $this->_crypt_password($actual_password)]);
         if ($res) {
             if ($this->_db->getAffectedRows() == 1) {
                 return true;

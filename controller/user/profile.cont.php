@@ -48,7 +48,7 @@ class Controller_User_Profile extends Controller_Base
         $form = new FW_Ajax_Form('email_form', false);
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
         $form->addField('Password', 'actual_password', true);
-        $form->addField('Email', 'email', true);
+        $form->addField('Email', 'user_email', true);
         return $form;
     }
 
@@ -94,9 +94,9 @@ class Controller_User_Profile extends Controller_Base
             $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
             $res = $user_obj->update_email(
                 $form->getValue('actual_password'),
-                $form->getValue('email'));
+                $form->getValue('user_email'));
             if ($res) {
-                $_SESSION['email'] = $form->getValue('email');
+                $_SESSION['user_email'] = $form->getValue('user_email');
                 return $form->getFormSuccess(LANG_PROFILE_SUCCESS);
             }
             return $form->getFormError(LANG_PROFILE_EMAIL_FAIL);

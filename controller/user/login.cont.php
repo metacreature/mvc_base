@@ -38,7 +38,7 @@ class Controller_User_Login extends Controller_Base
     protected function _get_form() {
         $form = new FW_Ajax_Form('login_form', false);
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
-        $form->addField('Email', 'email', true);
+        $form->addField('Email', 'user_email', true);
         $form->addField('Password', 'password', true);
         $form->addField('Checkbox', 'remember_login', false);
         return $form;
@@ -55,7 +55,7 @@ class Controller_User_Login extends Controller_Base
         $form->resolveRequest();
         if ($form->validate($form)) {
             $user_obj = new Model_User($this->_db, 0);
-            $data = $user_obj->login($form->getValue('email'), $form->getValue('password'));
+            $data = $user_obj->login($form->getValue('user_email'), $form->getValue('password'));
             if ($data) {
                 $this->_logout();
                 $_SESSION = array_merge($_SESSION, $data);

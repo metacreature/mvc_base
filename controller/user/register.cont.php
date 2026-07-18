@@ -40,7 +40,7 @@ class Controller_User_Register extends Controller_Base
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
         $form->addField('Text', 'user_name', true)
             ->setMinLength(6);
-        $form->addField('Email', 'email', true);
+        $form->addField('Email', 'user_email', true);
         $this->_add_create_password_fields($form);
         return $form;
     }
@@ -61,7 +61,7 @@ class Controller_User_Register extends Controller_Base
             $user_obj = new Model_User($this->_db, 0);
             $res = $user_obj->create(
                 $form->getValue('user_name'),
-                $form->getValue('email'), 
+                $form->getValue('user_email'), 
                 $form->getValue('password'));
             if ($res) {
                 return $form->getFormSuccess(LANG_REGISTER_SUCCESS);
