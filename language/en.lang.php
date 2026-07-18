@@ -74,6 +74,7 @@ define('LANG_PROFILE_PASSWORD_FAIL', 'Update failed!<br>Actual password is wrong
 
 define('CHECK_LOGIN_ERROR_NOT_LOGIN', 'You are not loged in!');
 
+define('LANG_LOGIN_GOTO', 'goto login');
 define('LANG_LOGIN_HDL', 'Login');
 define('LANG_LOGIN_SAVE', 'login');
 define('LANG_LOGIN_REMEMBER_LOGIN', 'stay logged in');

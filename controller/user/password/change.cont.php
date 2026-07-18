@@ -30,21 +30,14 @@ require_once (DOCUMENT_ROOT . '/models/user.model.php');
 require_once (DOCUMENT_ROOT . '/lib/fw/FW_Email.class.php');
 
 
-class Controller_User_Password extends Controller_Base
+class Controller_User_Password_Change extends Controller_Base
 {
     function __construct($db) {
         $this->_forbidden(!SETTINGS_LOGIN_ENABLED);
         parent::__construct($db);
     }
 
-    protected function _get_forgotten_form() {
-        $form = new FW_Ajax_Form('forgotten_form', false);
-        $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
-        $form->addField('Email', 'email', true);
-        return $form;
-    }
-
-    protected function _get_change_form() {
+    protected function _get_form() {
         $form = new FW_Ajax_Form('password_change_form', false);
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
         $form->addField('Hidden', 'token', true);
@@ -52,14 +45,14 @@ class Controller_User_Password extends Controller_Base
         return $form;
     }
  
-    function change() {
-        $form = $this->_get_change_form();
+    function view() {
+        $form = $this->_get_form();
         $form->resolveRequest();
         require_once (DOCUMENT_ROOT . '/views/user/password.change.view.html');
     }
 
-    function change_submit() {
-        $form = $this->_get_change_form();
+    function submit() {
+        $form = $this->_get_form();
         $form->resolveRequest();
 
         if (!$this->_validate_create_password_form($form)) {
@@ -79,51 +72,4 @@ class Controller_User_Password extends Controller_Base
         return $form->getFormError(LANG_PASSWORD_CHANGE_ERROR_TIME);
     }
 
-
-    function request() {
-        $this->_logout();
-        $form = $this->_get_forgotten_form();
-        require_once (DOCUMENT_ROOT . '/views/user/password.request.view.html');
-    }
-
-    function request_submit() {
-        $form = $this->_get_forgotten_form();
-        $form->resolveRequest();
-
-        if (!$form->validate($form)) {
-            return $form->getFormError(LANG_FORM_INVALID);
-        }
-        if (!$this->_validateCaptcha($_POST)) {
-            return $form->getFormError(LANG_CAPTCHA_INVALID); 
-        }
-        
-        usleep(rand(2154755, 6367810));
-
-        $user_obj = new Model_User($this->_db, 0);
-        $data = $user_obj->forgotten($form->getValue('email'));
-        if ($data) {
-
-            $change_url = WEB_URL . '/user/password/change?token=' .$data['user_token'];         
-            $user_name = $data['user_name'];
-
-            require_once (DOCUMENT_ROOT . '/emails/password.request.email.'.SELECTED_LANG.'.html');
-            $message = ob_get_contents();
-            ob_clean();
-
-            try {
-                $mail = new FW_Email();
-                $mail->setLanguage(SELECTED_LANG);
-                $mail->From = EMAIL_FROM_MAIL;
-                $mail->FromName = EMAIL_FROM_NAME;
-                $mail->addAddress($data['email']);
-                $mail->isHTML(true);
-                $mail->Subject = LANG_PASSWORD_REQUEST_SUBJECT;
-                $mail->Body = $message;
-                $mail->AltBody = $mail->html2text($message, true);
-                $mail->CharSet = "UTF-8";
-                $mail->send(DEBUG_EMAILS && IS_LOCALHOST);
-            } catch (Exception $e) {}
-        }
-        return $form->getFormSuccess(LANG_PASSWORD_REQUEST_SUCCESS);
-    }
 }

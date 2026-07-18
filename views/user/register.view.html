@@ -48,6 +48,7 @@
     $form->outButtonLine(LANG_GENEERATE_PASSWORD_BUTTON, 'generate_password btn-primary');
     outCaptcha(4,8, 'sm');
     $form->outSubmitLine(LANG_REGISTER_SAVE, 'save', '/user/register/save');
+    $form->outHTMLLine('<a href="/user/login">'.LANG_LOGIN_GOTO.'</a>', '', false);
     $form->outEndTag();
     ?>
 
@@ -58,7 +59,10 @@
         'default_error': LANG_FORM_DEFAULT_ERROR,
         'success': function(form, button, data) {
             if (data.success) {
-                top.location.replace('/user/login');
+                $('.register_form').data('is_submitting', true);
+                setTimeout(() => {
+                    top.location.replace('/user/login');
+                }, 2000);
             }
         }
     });

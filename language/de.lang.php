@@ -74,6 +74,7 @@ define('LANG_PROFILE_PASSWORD_FAIL', 'Speichern fehlgeschlagen!<br>Aktuelles Pas
 
 define('CHECK_LOGIN_ERROR_NOT_LOGIN', 'Sie sind nicht eingeloggt');
 
+define('LANG_LOGIN_GOTO', 'zum Login');
 define('LANG_LOGIN_HDL', 'Login');
 define('LANG_LOGIN_SAVE', 'Login');
 define('LANG_LOGIN_REMEMBER_LOGIN', 'Eingeloggt bleiben');

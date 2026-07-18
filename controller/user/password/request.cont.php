@@ -1,6 +1,6 @@
 <?php
 /*
- File: login.cont.php
+ File: password.cont.php
  Copyright (c) 2025 Clemens K. (https://github.com/metacreature)
  
  MIT License
@@ -27,8 +27,10 @@
 
 require_once (DOCUMENT_ROOT . '/lib/base.cont.php');
 require_once (DOCUMENT_ROOT . '/models/user.model.php');
+require_once (DOCUMENT_ROOT . '/lib/fw/FW_Email.class.php');
 
-class Controller_User_Login extends Controller_Base
+
+class Controller_User_Password_Request extends Controller_Base
 {
     function __construct($db) {
         $this->_forbidden(!SETTINGS_LOGIN_ENABLED);
@@ -36,44 +38,56 @@ class Controller_User_Login extends Controller_Base
     }
 
     protected function _get_form() {
-        $form = new FW_Ajax_Form('login_form', false);
+        $form = new FW_Ajax_Form('forgotten_form', false);
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
         $form->addField('Email', 'email', true);
-        $form->addField('Password', 'password', true);
-        $form->addField('Checkbox', 'remember_login', false);
         return $form;
     }
 
     function view() {
         $this->_logout();
         $form = $this->_get_form();
-        require_once (DOCUMENT_ROOT . '/views/user/login.view.html');
+        require_once (DOCUMENT_ROOT . '/views/user/password.request.view.html');
     }
 
-    function save() {
+    function submit() {
         $form = $this->_get_form();
         $form->resolveRequest();
-        if ($form->validate($form)) {
-            $user_obj = new Model_User($this->_db, 0);
-            $data = $user_obj->login($form->getValue('email'), $form->getValue('password'));
-            if ($data) {
-                $this->_logout();
-                $_SESSION = array_merge($_SESSION, $data);
-                if (SETTINGS_LOGIN_REMEMBER_ENABLED && $form->getValue('remember_login')) {
-                    $user_token = $user_obj->addRememberToken($form->getValue('password'));
-                    setcookie("remember_token", $user_token, time() + SETTINGS_LOGIN_REMEMBER_EXPIRE * 86400, "/", WEB_DOMAIN);
-                }
-                return $form->getFormSuccess(LANG_LOGIN_SUCCESS);
-            } else if ($data === false)  {
-                return $form->getFormError(LANG_LOGIN_BRUTE_FORCE);
-            }
-        }
-        return $form->getFormError(LANG_LOGIN_FAIL);
-        
-    }
 
-    function logout() {
-        $this->_logout();
-        return WEB_URL . '?logout';
+        if (!$form->validate($form)) {
+            return $form->getFormError(LANG_FORM_INVALID);
+        }
+        if (!$this->_validateCaptcha($_POST)) {
+            return $form->getFormError(LANG_CAPTCHA_INVALID); 
+        }
+        
+        usleep(rand(2154755, 6367810));
+
+        $user_obj = new Model_User($this->_db, 0);
+        $data = $user_obj->forgotten($form->getValue('email'));
+        if ($data) {
+
+            $change_url = WEB_URL . '/user/password/change?token=' .$data['user_token'];         
+            $user_name = $data['user_name'];
+
+            require_once (DOCUMENT_ROOT . '/emails/password.request.email.'.SELECTED_LANG.'.html');
+            $message = ob_get_contents();
+            ob_clean();
+
+            try {
+                $mail = new FW_Email();
+                $mail->setLanguage(SELECTED_LANG);
+                $mail->From = EMAIL_FROM_MAIL;
+                $mail->FromName = EMAIL_FROM_NAME;
+                $mail->addAddress($data['email']);
+                $mail->isHTML(true);
+                $mail->Subject = LANG_PASSWORD_REQUEST_SUBJECT;
+                $mail->Body = $message;
+                $mail->AltBody = $mail->html2text($message, true);
+                $mail->CharSet = "UTF-8";
+                $mail->send(DEBUG_EMAILS && IS_LOCALHOST);
+            } catch (Exception $e) {}
+        }
+        return $form->getFormSuccess(LANG_PASSWORD_REQUEST_SUCCESS);
     }
 }

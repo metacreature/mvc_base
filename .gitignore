@@ -1,5 +1,6 @@
 .buildpath
 .project
+todo.txt
 .env.*
 !.env.my_server_name
 /.settings/

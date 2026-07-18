@@ -84,7 +84,7 @@ class Model_User extends Model_Base{
         }
     }
 
-    function login($email, $password) {
+    function login($email, $password, $as_admin = false) {
 
         $email = strtolower($email);
 
@@ -100,14 +100,26 @@ class Model_User extends Model_Base{
             }
         }
 
+        $sql_admin = $as_admin ? ' AND is_admin = 1 ' : '';
         $res = $this->_db->executeQuery(
-            'SELECT * FROM tbl_user WHERE email = ? AND password = ?;',
+            'SELECT * FROM tbl_user WHERE email = ? AND password = ? '.$sql_admin.';',
             [$email, $this->_crypt_password($password)]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             if ($data) {
                 $this->setUserId($data['user_id']);
-                
+
+                unset($data['password']);
+                unset($data['update_timestamp']);
+                unset($data['cnt_update']);
+
+                if (!$as_admin) {
+                    $data['is_admin'] = false;
+                } else {
+                    $data['is_admin'] = $data['is_admin'] == 1;
+                }
+                $data['login'] = true;
+
                 $this->_db->executeQuery(
                     'DELETE FROM tbl_user_login_bruteforce WHERE email = ?;',
                     [$email]);

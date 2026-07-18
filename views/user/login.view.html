@@ -44,7 +44,7 @@
         $form->outCheckboxLine('remember_login', LANG_LOGIN_REMEMBER_LOGIN); 
     }
     $form->outSubmitLine(LANG_LOGIN_SAVE, 'save', '/user/login/save');
-    $form->outHTMLLine('<a href="/user/password/request">'.xssProtect(LANG_LOGIN_FORGOTTEN).'</a>', '', false);
+    $form->outHTMLLine('<a href="/user/password/request">'.LANG_LOGIN_FORGOTTEN.'</a>', '', false);
     $form->outEndTag();
     ?>
 
@@ -55,7 +55,7 @@
         'default_error': LANG_FORM_DEFAULT_ERROR,
         'success': function(form, button, data) {
             if (data.success) {
-                top.location.replace('<?php outLink(!empty($_GET['target']) ? str_replace("'", "\\'", $_GET['target']) :  '/'); ?>');
+                top.location.replace("<?php outLink(!empty($_GET['target']) ? $_GET['target'] :  '/'); ?>");
             }
         }
     });

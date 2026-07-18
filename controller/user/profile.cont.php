@@ -96,6 +96,7 @@ class Controller_User_Profile extends Controller_Base
                 $form->getValue('actual_password'),
                 $form->getValue('email'));
             if ($res) {
+                $_SESSION['email'] = $form->getValue('email');
                 return $form->getFormSuccess(LANG_PROFILE_SUCCESS);
             }
             return $form->getFormError(LANG_PROFILE_EMAIL_FAIL);
