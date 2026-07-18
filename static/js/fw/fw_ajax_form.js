@@ -157,6 +157,9 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 		if (settings.default_error) {
 			error_message = settings.default_error;
 		}
+		
+		IconCaptcha.reset();
+
 		form.find(".field-error").remove();
 		form.find(".field-line").removeClass('line-error');
 		form.find(".ajax-form-response").html('<div class="ajax-form-error alert alert-danger">'+error_message+'</div>').show();

@@ -65,8 +65,19 @@ class Controller_User_Register extends Controller_Base
                 $form->getValue('password'));
             if ($res) {
                 return $form->getFormSuccess(LANG_REGISTER_SUCCESS);
-            } 
-            return $form->getFormError(LANG_REGISTER_FAIL_EMAIL, array('captcha_reset' => true));
+            }
+            $error_msg = [];
+            $db_error = $this->_db->getError();
+            if (is_string($db_error)) {
+                if (strpos($db_error, 'lower_user_name')) {
+                    $error_msg[] = LANG_USER_DUPLICATE_NAME;
+                }
+                if (strpos($db_error, 'lower_user_email')) {
+                    $error_msg[] = LANG_USER_DUPLICATE_EMAIL;
+                }
+            }
+            $error_msg = count($error_msg) ? implode('<br>', $error_msg) : LANG_FORM_DEFAULT_ERROR;
+            return $form->getFormError($error_msg, array('captcha_reset' => true));
         } 
         return $form->getFormError(LANG_FORM_INVALID); 
     }

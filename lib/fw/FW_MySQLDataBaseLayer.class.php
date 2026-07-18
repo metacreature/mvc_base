@@ -46,6 +46,8 @@ class FW_MySqlDataBaseLayer
 
     protected $_arrResource;
 
+    protected $_arrError;
+
     protected $_arrLog;
     
     protected static $_singleton = array();
@@ -70,6 +72,7 @@ class FW_MySqlDataBaseLayer
     {        
         $this->_bDebugMode = $bDebugMode;
         $this->_arrResource = array();
+        $this->_arrError = array();
         $this->_arrLog = array();
 
         $persistent = $persistent ? 'p:' : '';
@@ -178,13 +181,15 @@ class FW_MySqlDataBaseLayer
             }
             if ($rRes !== false) {
                 $this->_arrResource[$iRn] = $rRes instanceof MySqli_result ? $rRes : null;
+                $this->_arrError[$iRn] = null;
                 $this->_arrLog[] = $iRn . ' ' . $sSQL;
                 return true;
             }
         } catch (Exception $e) {}
 
+        $this->_arrError[$iRn] = $this->_rMySqli->error;
         $sError = '<b>' . $iRn . ' ' . $sSQL . '
-		<br>(ERROR)' . $this->_rMySqli->error . '</b>';
+		<br>(ERROR)' . $this->_arrError[$iRn] . '</b>';
         $this->_arrLog[] = $sError;
 
         return false;
@@ -197,19 +202,28 @@ class FW_MySqlDataBaseLayer
 
             if ($rRes !== false) {
                 $this->_arrResource[$iRn] = $rRes instanceof MySqli_result ? $rRes : null;
+                $this->_arrError[$iRn] = null;
                 $this->_arrLog[] = $iRn . ' ' . $sSQL;
                 return true;
             }
         } catch (Exception $e) {}
 
+        $this->_arrError[$iRn] = $this->_rMySqli->error;
         $sError = '<b>' . $iRn . ' ' . $sSQL . '
-		<br>(ERROR)' . $this->_rMySqli->error . '</b>';
+		<br>(ERROR)' . $this->_arrError[$iRn] . '</b>';
         $this->_arrLog[] = $sError;
         
         return false;
     }
 
     // ============ Result-Methods ============ //
+    
+    function getError($iRn = 0)
+    {
+        return $this->_arrError[$iRn];
+    }
+
+
     function fetchAssoc($iRn = 0)
     {
         return $this->_arrResource[$iRn]->fetch_assoc();

@@ -82,7 +82,13 @@ class Controller_User_Profile extends Controller_Base
                 $_SESSION['user_name'] = $form->getValue('user_name');
                 return $form->getFormSuccess(LANG_PROFILE_SUCCESS);
             }
-            return $form->getFormError(LANG_PROFILE_DATA_FAIL);
+            $db_error = $this->_db->getError();
+            if (is_string($db_error)) {
+                if (strpos($db_error, 'lower_user_name')) {
+                    return $form->getFormError(LANG_USER_DUPLICATE_NAME);
+                }
+            }
+            return $form->getFormError(LANG_FORM_DEFAULT_ERROR);
         }
         return $form->getFormError(LANG_FORM_INVALID);
     }
@@ -99,7 +105,14 @@ class Controller_User_Profile extends Controller_Base
                 $_SESSION['user_email'] = $form->getValue('user_email');
                 return $form->getFormSuccess(LANG_PROFILE_SUCCESS);
             }
-            return $form->getFormError(LANG_PROFILE_EMAIL_FAIL);
+            $db_error = $this->_db->getError();
+            if (is_string($db_error)) {
+                if (strpos($db_error, 'lower_user_email')) {
+                    return $form->getFormError(LANG_USER_DUPLICATE_EMAIL);
+                }
+                return $form->getFormError(LANG_FORM_DEFAULT_ERROR);
+            }
+            return $form->getFormError(LANG_PROFILE_PASSWORD_FAIL);
         }
         return $form->getFormError(LANG_FORM_INVALID);
     }

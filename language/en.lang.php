@@ -47,10 +47,11 @@ define('LANG_GENEERATE_PASSWORD_BUTTON', 'Generate password');
 define('LANG_GENEERATE_PASSWORD_POPUP_TITLE', 'Generate password');
 define('LANG_GENEERATE_PASSWORD_POPUP_TEXT', 'The password was copied to your clipboard!');
 define('LANG_GENEERATE_PASSWORD_POPUP_BUTTON', 'OK');
+define('LANG_USER_DUPLICATE_EMAIL', 'E-Mail already exists!');
+define('LANG_USER_DUPLICATE_NAME', 'Username already exists!');
 
 define('LANG_REGISTER_HDL', 'Registration');
 define('LANG_REGISTER_SAVE', 'register');
-define('LANG_REGISTER_FAIL_EMAIL', 'E-Mail already exists!');
 define('LANG_REGISTER_SUCCESS', 'Registration was successfull!');
 
 define('LANG_PASSWORD_REQUEST_HDL', 'Forggoten password');
@@ -64,13 +65,11 @@ define('LANG_PASSWORD_CHANGE_ERROR_TIME', 'The link expired! <br>Please request 
 define('LANG_PASSWORD_CHANGE_SUCCESS', 'The password was changed successfully!');
 
 define('LANG_PROFILE_SUCCESS', 'Updated succeesfully!');
+define('LANG_PROFILE_PASSWORD_FAIL', 'Update failed!<br>Actual password is wrong!');
 define('LANG_PROFILE_SAVE', 'update');
 define('LANG_PROFILE_DATA_HDL', 'Update profile');
-define('LANG_PROFILE_DATA_FAIL', 'Update failed!');
 define('LANG_PROFILE_EMAIL_HDL', 'Update E-Mail');
-define('LANG_PROFILE_EMAIL_FAIL', 'Update failed!<br>Actual password is wrong or E-Mail allready exists!');
 define('LANG_PROFILE_PASSWORD_HDL', 'Update password');
-define('LANG_PROFILE_PASSWORD_FAIL', 'Update failed!<br>Actual password is wrong!');
 
 define('CHECK_LOGIN_ERROR_NOT_LOGIN', 'You are not loged in!');
 

@@ -47,10 +47,11 @@ define('LANG_GENEERATE_PASSWORD_BUTTON', 'Passwort generieren');
 define('LANG_GENEERATE_PASSWORD_POPUP_TITLE', 'Passwort generieren');
 define('LANG_GENEERATE_PASSWORD_POPUP_TEXT', 'Das Passwort wurde in die Zwischenablage kopiert!');
 define('LANG_GENEERATE_PASSWORD_POPUP_BUTTON', 'OK');
+define('LANG_USER_DUPLICATE_EMAIL', 'Die E-Mail ist schon vorhanden!');
+define('LANG_USER_DUPLICATE_NAME', 'Der Benutzername ist schon vorhanden!');
 
 define('LANG_REGISTER_HDL', 'Registrieren');
 define('LANG_REGISTER_SAVE', 'Registrieren');
-define('LANG_REGISTER_FAIL_EMAIL', 'E-Mail schon vorhanden!');
 define('LANG_REGISTER_SUCCESS', 'Registrierung erfolgreich!');
 
 define('LANG_PASSWORD_REQUEST_HDL', 'Passwort vergessen');
@@ -64,13 +65,11 @@ define('LANG_PASSWORD_CHANGE_ERROR_TIME', 'Der Link ist abgelaufen! <br>Bitte fo
 define('LANG_PASSWORD_CHANGE_SUCCESS', 'Passwort wurde erfolgreich geändert!');
 
 define('LANG_PROFILE_SUCCESS', 'Erfolgreich gespeichert!');
+define('LANG_PROFILE_PASSWORD_FAIL', 'Speichern fehlgeschlagen!<br>Aktuelles Passwort ist falsch!');
 define('LANG_PROFILE_SAVE', 'Speichern');
 define('LANG_PROFILE_DATA_HDL', 'Profildaten ändern');
-define('LANG_PROFILE_DATA_FAIL', 'Speichern fehlgeschlagen!');
 define('LANG_PROFILE_EMAIL_HDL', 'E-Mail ändern');
-define('LANG_PROFILE_EMAIL_FAIL', 'Speichern fehlgeschlagen!<br>Aktuelles Passwort ist falsch oder E-Mail existiert bereits!');
 define('LANG_PROFILE_PASSWORD_HDL', 'Passwort ändern');
-define('LANG_PROFILE_PASSWORD_FAIL', 'Speichern fehlgeschlagen!<br>Aktuelles Passwort ist falsch!');
 
 define('CHECK_LOGIN_ERROR_NOT_LOGIN', 'Sie sind nicht eingeloggt');
 

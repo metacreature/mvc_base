@@ -2,14 +2,17 @@
 CREATE TABLE tbl_user (
   user_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_name VARCHAR(255) NOT NULL,
+  lower_user_name VARCHAR(255) NOT NULL,
   user_email VARCHAR(255) NOT NULL,
+  lower_user_email VARCHAR(255) NOT NULL,
   password VARCHAR(128) NOT NULL,
   is_admin INT(1) NOT NULL,
   insert_timestamp  DATETIME NOT NULL,
   update_timestamp  DATETIME NOT NULL,
   cnt_update INT UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (user_id),
-  UNIQUE KEY LOWER(user_email)
+  UNIQUE KEY lower_user_name(lower_user_name),
+  UNIQUE KEY lower_user_email(lower_user_email)
 ) CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE TABLE tbl_user_remember(
@@ -29,8 +32,8 @@ CREATE TABLE tbl_user_forgotten(
 ) CHARACTER SET ascii COLLATE ascii_general_ci;
 
 CREATE TABLE tbl_user_login_bruteforce(
-  user_email VARCHAR(255) NOT NULL,
+  lower_user_email VARCHAR(255) NOT NULL,
   insert_timestamp  DATETIME NOT NULL,
-  INDEX public (insert_timestamp)
+  INDEX insert_timestamp (insert_timestamp)
 ) CHARACTER SET utf8 COLLATE utf8_general_ci;
 

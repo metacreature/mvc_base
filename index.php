@@ -97,6 +97,7 @@ if ($function && preg_match('#^[a-z_]+$#', $function) && method_exists($obj_cont
 	if (is_string($result)) {
 		header('Location: ' . $result);
 	} elseif (is_array($result)) {
+		ob_clean();
 		header('Content-Type: application/json; charset=utf-8');
 		echo json_encode($result);
 		ob_end_flush();
