@@ -59,4 +59,7 @@ if (SETTINGS_TIMEZONE) {
 
 unset($ini_data);
 
+require_once (DOCUMENT_ROOT . '/lib/fw/FW_Date.static.php');
+FW_Date::set_formats(SETTINGS_DATE_FORMAT_DATETIME, SETTINGS_DATE_FORMAT_DATE, SETTINGS_DATE_FORMAT_TIME);
+
 require './lib/vendor/autoload.php';
