@@ -123,7 +123,8 @@ if ($function && preg_match('#^[a-z0-9_]+$#', $function) && method_exists($obj_c
 	} else if ($result instanceof FW_Download) {
 		my_ob_clean();
 		if (!$result->send()) {
-			error_forbidden();
+			header('HTTP/1.0 404 Not Found');
+			require_once(DOCUMENT_ROOT . '/404.html');
 		}
 	} else {
 		my_ob_clean();
