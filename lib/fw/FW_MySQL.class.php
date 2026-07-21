@@ -1,6 +1,6 @@
 <?php
 /*
- File: FW_MySqlDataBaseLayer.class.php
+ File: FW_MySQL.class.php
  Copyright (c) 2014 Clemens K. (https://github.com/metacreature)
  
  MIT License
@@ -27,124 +27,147 @@
 require_once ('FW_ErrorLogger.static.php');
 require_once ('FW_Date.static.php');
 
-define('FW_MySqlDataBaseLayer_file_name', 'db_queries.log.html');
+define('FW_MySQL_file_name', 'db_queries.log.html');
 
 
-class FW_MySqlDataBaseLayer
+class FW_MySQL
 {
 
-    static $sLogFileName = FW_MySqlDataBaseLayer_file_name;
+    static $sLogFileName = FW_MySQL_file_name;
+
+    // =========== singleton =========== //
+
+    protected static $_singleton = array();
+
+    protected static $_credentials;
+
+    protected static $_bDebugMode = false;
+
+    protected static $_sTimezone;
+
+    static function setCredentials($credentials) {
+        self::$_credentials = $credentials;
+    }
+
+    static function setDebugMode($bDebugMode) {
+        self::$_bDebugMode = $bDebugMode;
+    }
+
+    static function setTimezone($sTimezone) {
+        self::$_sTimezone = $sTimezone;
+    }
+    
+    static function singleton($db_credential_key) 
+    {
+        if (!array_key_exists($db_credential_key, self::$_singleton)) {
+            self::$_singleton[$db_credential_key] = new self(self::$_credentials[$db_credential_key]);
+        }
+        return self::$_singleton[$db_credential_key];
+    }
 
     // =========== Member Variables =========== //
-    protected $_bIsInit = false;
+
+    protected $_connectionCrededentials;
+
+    protected $_isConnected;
     
-    protected $_bLockedTables = false;
+    protected $_hasLockedTables;
 
     protected $_rMySqli;
-
-    protected $_bDebugMode;
 
     protected $_arrResource;
 
     protected $_arrError;
 
     protected $_arrLog;
-    
-    protected static $_singleton = array();
-    
-    static function singleton($host, $user, $password, $dbname, $persistent = false, $timezone = null, $bDebugMode = false, $connection = 'db') 
-    {
-        if (!array_key_exists($connection, self::$_singleton)) {
-            self::$_singleton[$connection] = new self($host, $user, $password, $dbname, $persistent, $timezone, $bDebugMode);
-        }
-        return self::$_singleton[$connection];
-    }
-
-    static function getsingleton($connection = 'db') 
-    {
-        if (array_key_exists($connection, self::$_singleton)) {
-            return self::$_singleton[$connection];
-        }
-    }
 
     // ======== Constructor/Destructor ========= //
-    function __construct($host, $user, $password, $dbname, $persistent = false, $timezone = null, $bDebugMode = false)
-    {        
-        $this->_bDebugMode = $bDebugMode;
+
+    function __construct($connectionCrededentials)
+    {    
+        $this->_connectionCrededentials = $connectionCrededentials;
+        $this->_isConnected = false;
+    }
+
+    function __destruct()
+    {
+        $this->close();
+    }
+
+    // ========== Connection-Methods ========== //
+
+    function connect()
+    {
+        if ($this->_isConnected) {
+            return;
+        }
+
         $this->_arrResource = array();
         $this->_arrError = array();
         $this->_arrLog = array();
+        $this->_hasLockedTables = false;
 
-        $persistent = $persistent ? 'p:' : '';
+        $con = $this->_connectionCrededentials;
 
-        $this->_rMySqli = new MySqli($persistent . $host, $user, $password, $dbname);
+        $persistent = $con['persistent'] ? 'p:' : '';
+        $this->_rMySqli = new MySqli($persistent . $con['host'], $con['username'], $con['password'], $con['dbname']);
 
         if ($this->_rMySqli->connect_errno) {
             die('<div style="color:red; padding:20px;">Could not connect to database #1!</div>');
         }
 
         $this->_rMySqli->set_charset('utf8');
-        if ($timezone) {
-            $this->_rMySqli->query('SET time_zone = ' . $this->escape($timezone));
+        if (self::$_sTimezone) {
+            $this->_rMySqli->query('SET time_zone = ' . $this->escape(self::$_sTimezone));
         }
 
-        $this->_bIsInit = true;
+        $this->_isConnected = true;
     }
 
-    function __destruct()
-    {
-        if ($this->_bIsInit) {
-            if ($this->_bLockedTables)
-                $this->unlockTables();
-            if ($this->_bDebugMode)
-                $this->writeLog();
-        }
-        $this->_bIsInit = false;
-    }
-
-
-    // ================ Getter ================ //
-    function getIsInit()
-    {
-        return $this->_bIsInit;
-    }
-
-    // ========== Connection-Methods ========== //
     function close()
     {
-        $this->_bIsInit = false;
-        $this->_rMySqli->close();
+        if ($this->_isConnected) {
+            if ($this->_hasLockedTables)
+                $this->unlockTables();
+            if (self::$_bDebugMode)
+                $this->writeLog();
+            $this->_rMySqli->close();
+            $this->_rMySqli = null;
+        }
+        $this->_hasLockedTables = false;
+        $this->_isConnected = false;
     }
 
     // ============= Helper =================== //
 
-    function prepareArrayToSet($arrAssocData)
+    static function prepareArrayToSet($arrAssocData)
     {
         $sql = array();
         foreach ($arrAssocData as $sFieldName => $mValue) {
             if (preg_match('#^[a-z0-9_`]*$#i', $sFieldName)) {
                 $sql[] = $sFieldName . ' = ?';
             } else {
-                throw new Exception('FW_MySqlDataBaseLayer::prepareArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
+                throw new Exception('FW_MySQL::prepareArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
             }
         }
         return implode(', ', $sql);
     }
 
-    function prepareArrayToIn($arrData)
+    static function prepareArrayToIn($arrData)
     {
         return implode(', ', array_fill(0, count($arrData), '?'));
     }
 
-
     // =========== Security-Methods =========== //
     
-    function escape($mValue)
+    static function escape($mValue)
     {
-        return '\'' . $this->_rMySqli->real_escape_string((string) $mValue) . '\'';
+        $this->connect();
+        
+        return '\'' . MySqli::real_escape_string((string) $mValue) . '\'';
     }
 
-    function escapeArray($arrData)
+    static function escapeArray($arrData)
     {
         foreach ($arrData as $sKey => $mValue) {
             $arrData[$sKey] = $this->escape($mValue);
@@ -152,19 +175,19 @@ class FW_MySqlDataBaseLayer
         return $arrData;
     }
 
-    function escapeArrayToSet($arrAssocData)
+    static function escapeArrayToSet($arrAssocData)
     {
         foreach ($arrAssocData as $sFieldName => $mValue) {
             if (preg_match('#^[a-z0-9_`]*$#i', $sFieldName)) {
                 $arrAssocData[$sFieldName] = $sFieldName . ' = ' . $this->escape($mValue);
             } else {
-                throw new Exception('FW_MySqlDataBaseLayer::escapeArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
+                throw new Exception('FW_MySQL::escapeArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
             }
         }
         return implode(', ', $arrAssocData);
     }
 
-    function escapeArrayToIn($arrData)
+    static function escapeArrayToIn($arrData)
     {
         return implode(', ', $this->escapeArray($arrData));
     }
@@ -173,6 +196,9 @@ class FW_MySqlDataBaseLayer
 
     function executeQuery($sSQL, $data = null, $iRn = 0)
     {   
+        
+        $this->connect();
+        
         try{
             if (is_null($data)) {
                 $rRes = @$this->_rMySqli->query($sSQL, MySqlI_STORE_RESULT);
@@ -197,6 +223,8 @@ class FW_MySqlDataBaseLayer
 
     function executeUnbufferedQuery($sSQL, $iRn = 0)
     {
+        $this->connect();
+
         try {
             $rRes = @$this->_rMySqli->query($sSQL, MySqlI_USE_RESULT);
 
@@ -338,8 +366,11 @@ class FW_MySqlDataBaseLayer
     }
 
     // ========== Transaction-Methods ========= //
+
     function begin()
     {
+        $this->connect();
+        
         $this->_rMySqli->begin_transaction();
         $this->_arrLog[] = 'BEGIN';
     }
@@ -361,14 +392,14 @@ class FW_MySqlDataBaseLayer
     {
         if (is_array($mTables))
             $mTables = implode(' WRITE, ', $mTables);
-        $this->_bLockedTables = true;
+        $this->_hasLockedTables = true;
         $this->executeQuery('LOCK TABLES ' . $mTables . ' WRITE', null, 1846464);
     }
 
     function unlockTables()
     {
         $this->executeQuery('UNLOCK TABLES', null, 1846464);
-        $this->_bLockedTables = false;
+        $this->_hasLockedTables = false;
     }
 
     function optimizeTables($mTables)
@@ -382,6 +413,7 @@ class FW_MySqlDataBaseLayer
     }
 
     // ============== Info-Methods =========== //
+
     function showDatabases()
     {
         $arrDatabases = array();
@@ -443,11 +475,11 @@ class FW_MySqlDataBaseLayer
 
     function writeLog()
     {
-        if ($this->_bIsInit) {
+        if ($this->_isConnected) {
             if (count($this->_arrLog)) {
-                FW_ErrorLogger::writeInfo('SQL Log: ' . count($this->_arrLog) . " Abfragen<br>\n<ul><li>" . implode("</li>\n<li>", $this->_arrLog) . '</li></ul>', FW_MySqlDataBaseLayer::$sLogFileName);
+                FW_ErrorLogger::writeInfo('SQL Log: ' . count($this->_arrLog) . " Abfragen<br>\n<ul><li>" . implode("</li>\n<li>", $this->_arrLog) . '</li></ul>', FW_MySQL::$sLogFileName);
             } else {
-                FW_ErrorLogger::writeInfo('SQL Log: 0 Abfragen', FW_MySqlDataBaseLayer::$sLogFileName);
+                FW_ErrorLogger::writeInfo('SQL Log: 0 Abfragen', FW_MySQL::$sLogFileName);
             }
         }
     }

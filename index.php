@@ -26,12 +26,15 @@
 
 $time_start = microtime(true);
 
+// settings include
+require_once ('lib/settings.inc.php');
+
 function log_runtime() {
 	global $time_start;
 
 	if (DEBUG_EXECUTION_TIME) {
 		$time_end = microtime(true);
-		$time = round(($time_end - $time_start) * 1000);
+		$time = round(($time_end - $time_start) * 1000, 2);
 		$url = str_replace('"', '', $_SERVER['REQUEST_URI']);
 		$memory = round(memory_get_usage() / 1024);
 
@@ -59,16 +62,10 @@ function error_forbidden() {
 	require_once(DOCUMENT_ROOT . '/403.html');
 }
 
-// FW-Includes
-require_once ('lib/settings.inc.php');
-require_once ('lib/fw/func.inc.php');
-require_once ('lib/fw/FW_MySQLDataBaseLayer.class.php');
-require_once ('lib/fw/FW_Download.class.php');
-
-
-// database
-$db = FW_MySQLDataBaseLayer::singleton(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME, DB_PERSISTENT, SETTINGS_TIMEZONE, DEBUG_DB_QUERIES && IS_LOCALHOST);
-ignore_user_abort(true);
+function error_notfound() {
+	header('HTTP/1.0 404 Not Found');
+	require_once(DOCUMENT_ROOT . '/404.html');
+}
 
 // get request
 $url = str_replace('\\', '/', $_SERVER['REQUEST_URI']);
@@ -78,7 +75,7 @@ $slashpos = strrpos($url, '/');
 // get controller and function
 $controller_request = substr($url, 0, $slashpos === false ? null : $slashpos);
 
-if ($url && preg_match('#^[a-z0-9_\/]+$#', $url) && file_exists('controller/' . $url  . '.cont.php')) {
+if ($url && preg_match('#^[a-z0-9_\/-]+$#', $url) && file_exists('controller/' . $url  . '.cont.php')) {
 	$controller_file = 'controller/' . $url;
 	$function = 'view';
 } elseif ($controller_request && preg_match('#^[a-z0-9_\/]+$#', $controller_request) && file_exists('controller/' . $controller_request  . '.cont.php')) {
@@ -93,12 +90,30 @@ if ($url && preg_match('#^[a-z0-9_\/]+$#', $url) && file_exists('controller/' . 
     exit;
 }
 
-$controller_name = implode('_', array_map('ucfirst', preg_split('#[\/_]#', $controller_file)));
+/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// legit request /////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+
+//  require here coz the script may exit earlier
+require_once ('lib/fw/FW_Download.class.php'); 
+
+ignore_user_abort(true);
+
+
+// choose db and replace the hidden admin path for correct class-name
+$tmp = preg_split('#[\/]#', $controller_file);
+if (preg_match('#^'.SECURITY_ADMIN_CONTROLLER_FOLDER.'$#', $tmp[1]) === 1) {
+	$tmp[1] = 'admin';
+	define('DB_CREDENTIAL_KEY', 'ADMIN');
+} else {
+	define('DB_CREDENTIAL_KEY', 'USER');
+}
 
 
 // execute
+$controller_name = implode('_', array_map('ucfirst', preg_split('#[\/_]#', implode('/', $tmp))));
 @require_once($controller_file  . '.cont.php');
-$obj_controller = new $controller_name($db);
+$obj_controller = new $controller_name(DB_CREDENTIAL_KEY);
 
 if ($function && preg_match('#^[a-z0-9_]+$#', $function) && method_exists($obj_controller, $function)) {
 	ob_start();
@@ -123,8 +138,7 @@ if ($function && preg_match('#^[a-z0-9_]+$#', $function) && method_exists($obj_c
 	} else if ($result instanceof FW_Download) {
 		my_ob_clean();
 		if (!$result->send()) {
-			header('HTTP/1.0 404 Not Found');
-			require_once(DOCUMENT_ROOT . '/404.html');
+			error_notfound();
 		}
 	} else {
 		my_ob_clean();

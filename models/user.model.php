@@ -82,7 +82,7 @@ class Model_User extends Model_Base{
 
         return $this->_db->executeQuery(
             'INSERT INTO tbl_user SET 
-            '.$this->_db->prepareArrayToSet($data).',
+            '.FW_MySQL::prepareArrayToSet($data).',
             insert_timestamp = NOW();',
             array_values($data));
     }
@@ -105,7 +105,7 @@ class Model_User extends Model_Base{
 
         $res = $this->_db->executeQuery(
             'UPDATE tbl_user SET 
-                '.$this->_db->prepareArrayToSet($data).',
+                '.FW_MySQL::prepareArrayToSet($data).',
                 update_timestamp = NOW(),
                 cnt_update = cnt_update + 1
             WHERE user_id = ?;',

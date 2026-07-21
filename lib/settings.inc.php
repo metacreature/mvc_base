@@ -28,7 +28,7 @@ ini_set('error_reporting', E_ALL);
 ini_set('display_errors', true);
 
 if (!empty($_SERVER['HTTP_HOST'])) {
-    define('IS_LOCALHOST', preg_match('#localhost$#', $_SERVER['HTTP_HOST']) !== false);
+    define('IS_LOCALHOST', preg_match('#localhost$#', $_SERVER['HTTP_HOST']) === 1);
 } else {
     define('IS_LOCALHOST', false);
 }
@@ -38,7 +38,7 @@ define('WEB_DOMAIN', $_SERVER['HTTP_HOST']);
 define('WEB_URL', $_SERVER['REQUEST_SCHEME'].'://'.WEB_DOMAIN);
 define('DOCUMENT_ROOT', dirname(dirname(__FILE__)));
 
-$ini_data = parse_ini_file(DOCUMENT_ROOT.'/.env.'.strtolower($_SERVER['SERVER_NAME']), false, INI_SCANNER_TYPED);
+$ini_data = parse_ini_file(DOCUMENT_ROOT.'/.env.'.strtolower($_SERVER['SERVER_NAME']), true, INI_SCANNER_TYPED);
 
 if ($ini_data['SECURITY_FORCE_HTTPS'] && strtolower($_SERVER['REQUEST_SCHEME']) !== 'https') {
 	header('Location: https://'.WEB_DOMAIN);
@@ -58,8 +58,3 @@ if (SETTINGS_TIMEZONE) {
 }
 
 unset($ini_data);
-
-require_once (DOCUMENT_ROOT . '/lib/fw/FW_Date.static.php');
-FW_Date::set_formats(SETTINGS_DATE_FORMAT_DATETIME, SETTINGS_DATE_FORMAT_DATE, SETTINGS_DATE_FORMAT_TIME);
-
-require './lib/vendor/autoload.php';

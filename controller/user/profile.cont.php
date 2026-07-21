@@ -30,9 +30,9 @@ require_once (DOCUMENT_ROOT . '/models/user.model.php');
 
 class Controller_User_Profile extends Controller_Base
 {
-    function __construct($db) {
+    function __construct($db_credential_key) {
         $this->_forbidden(!SETTINGS_LOGIN_ENABLED);
-        parent::__construct($db);
+        parent::__construct($db_credential_key);
         $this->_checkLogin();
     }
 

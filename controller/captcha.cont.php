@@ -29,9 +29,9 @@ require_once (DOCUMENT_ROOT . '/lib/base.cont.php');
 
 class Controller_Captcha extends Controller_Base
 {
-    function __construct($db) {
+    function __construct($db_credential_key) {
         $this->_forbidden(!SECURITY_ENABLE_CAPTCHA);
-        parent::__construct($db);
+        parent::__construct($db_credential_key);
     }
 
     function view() {

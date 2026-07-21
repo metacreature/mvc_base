@@ -24,13 +24,32 @@
  SOFTWARE.
 */
 
+// require here coz it has to be global
+require_once (DOCUMENT_ROOT . '/lib/fw/func.inc.php');
+require_once (DOCUMENT_ROOT . '/lib/vendor/autoload.php');
 
 class Controller_Base
 {
     protected $_db = null;
 
-    function __construct($db) {
-        $this->_db = $db;
+    function __construct($db_credential_key) {
+
+
+        // require here coz the script can be exited width _forbidden() before
+        require_once (DOCUMENT_ROOT . '/lib/fw/FW_MySQL.class.php');
+        require_once (DOCUMENT_ROOT . '/lib/fw/FW_Ajax_Form.class.php');
+        require_once (DOCUMENT_ROOT . '/lib/fw/FW_Date.static.php');
+        require_once (DOCUMENT_ROOT . '/lib/languagelist.inc.php');
+
+        FW_Date::set_formats(SETTINGS_DATE_FORMAT_DATETIME, SETTINGS_DATE_FORMAT_DATE, SETTINGS_DATE_FORMAT_TIME);
+
+        // database
+        FW_MySQL::setCredentials(DB_CREDENTIALS);
+        FW_MySQL::setDebugMode(DEBUG_DB_QUERIES && IS_LOCALHOST);
+        FW_MySQL::setTimezone(SETTINGS_TIMEZONE);
+
+        $this->_db = FW_MySQL::singleton($db_credential_key);
+
 
         if (empty($_COOKIE['session']) || strlen($_COOKIE['session']) < 150) {
             $this->_sessionStart();
@@ -46,6 +65,7 @@ class Controller_Base
         if (SETTINGS_LOGIN_ENABLED) {
             if (SETTINGS_LOGIN_REMEMBER_ENABLED && empty($_SESSION['login']) && !empty($_COOKIE['remember_token'])) {
                 
+                // require here coz its not very often used
                 require_once (DOCUMENT_ROOT . '/models/user.model.php');
 
                 $user_obj = new Model_User($this->_db);
@@ -60,9 +80,6 @@ class Controller_Base
         } else {
             $_SESSION['login'] = false;
         }
-
-        require_once ('fw/FW_Ajax_Form.class.php');
-        require_once ('languagelist.inc.php');
 
         // language
         $selected_lang = SETTINGS_LANG_DEFAULT;

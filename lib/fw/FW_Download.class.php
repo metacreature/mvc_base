@@ -33,7 +33,7 @@ class FW_Download{
 			$this->_mime_type = self::getMimeType($this->_filename);
 		}
 		if (is_string($this->_data)) {
-			if (preg_match('#^([a-z0-9_.\\\\\/-]+)\\.([a-z0-9]+)$#i', $this->_data) !== false) {
+			if (preg_match('#^([a-z0-9_.\\\\\/-]+)\\.([a-z0-9]+)$#i', $this->_data)) {
 				$orig_filename = basename($this->_data);
 				if (preg_match('#^(\..+|.+\.(php|html|ini|inc|log))$#i', $orig_filename)) {
 					return false;

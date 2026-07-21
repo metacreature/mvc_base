@@ -29,8 +29,8 @@ require_once (DOCUMENT_ROOT . '/lib/base.cont.php');
 
 class Controller_Home extends Controller_Base
 {
-    function __construct($db) {
-        parent::__construct($db);
+    function __construct($db_credential_key) {
+        parent::__construct($db_credential_key);
     }
 
     function view() {

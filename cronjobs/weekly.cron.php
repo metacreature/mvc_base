@@ -26,12 +26,15 @@
 
 require_once (dirname(dirname(__FILE__)).'/lib/settings.inc.php');
 require_once (DOCUMENT_ROOT.'/lib/fw/func.inc.php');
-require_once (DOCUMENT_ROOT.'/lib/fw/FW_MySQLDataBaseLayer.class.php');
+require_once (DOCUMENT_ROOT.'/lib/fw/FW_MySQL.class.php');
 
 ini_set('max_execution_time', 3600);
 
 
-$db = FW_MySQLDataBaseLayer::singleton(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME, DB_PERSISTENT, SETTINGS_TIMEZONE, DEBUG_DB_QUERIES && IS_LOCALHOST);
+FW_MySQL::setCredentials(DB_CREDENTIALS);
+FW_MySQL::setDebugMode(DEBUG_DB_QUERIES && IS_LOCALHOST);
+FW_MySQL::setTimezone(SETTINGS_TIMEZONE);
+$db = FW_MySQL::singleton('ADMIN');
 
 
 $db->executeQuery('DELETE FROM tbl_user_remember WHERE insert_timestamp < NOW() - INTERVAL ? day', [SETTINGS_LOGIN_REMEMBER_EXPIRE]);
