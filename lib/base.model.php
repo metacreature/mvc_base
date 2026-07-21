@@ -29,14 +29,15 @@
 class Model_Base
 {
     protected $_db = null;
-    protected $_user_id = null;
 
-    function __construct($db, $user_id) {
+    function __construct($db) {
         $this->_db = $db;
-        $this->setUserId($user_id);
     }
-    
-    function setUserId($user_id) {
-        $this->_user_id = $user_id ? (int)$user_id : 0;
+
+    protected function _cleanBasePutData(&$data, $primary_key) {
+        unset($data[$primary_key]);
+        unset($data['insert_timestamp']);
+        unset($data['update_timestamp']);
+        unset($data['cnt_update']);
     }
 }

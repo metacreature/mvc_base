@@ -94,7 +94,12 @@
             $('nav.navbar .user_name span').html($('.profile_form #user_name').val());
         }
     });
-    $('.email_form, .password_form').ajax_form({'default_error': LANG_FORM_DEFAULT_ERROR});
+    $('.email_form, .password_form').ajax_form({
+        'default_error': LANG_FORM_DEFAULT_ERROR,
+        success: function(form){
+            form.find('input#actual_password, input#password, input#password_confirmation').val('');
+        }
+    });
 </script>
 
 <?php require_once (DOCUMENT_ROOT . '/views/includes/genpassword.view.html'); ?>

@@ -47,14 +47,14 @@
 
 <?php 
 	if (SETTINGS_LOGIN_ENABLED) {
-		if (Controller_Base::is_login()) { 
+		if (Controller_Base::isLogin()) { 
 ?>
 			<li class="nav-item">
-				<a class="nav-link icon-link user_name" href="/user/profile" title="<?php outT(Controller_Base::get_user_name()); ?>">
+				<a class="nav-link icon-link user_name" href="/user/profile" title="<?php outT(Controller_Base::getUserName()); ?>">
 					<svg class="bi">
 						<use href="/static/node_modules/bootstrap-icons/bootstrap-icons.svg#person-circle"></use>
 					</svg>
-					<span><?php outT(Controller_Base::get_user_name()); ?></span>
+					<span><?php outT(Controller_Base::getUserName()); ?></span>
 				</a>
 			</li>
 			

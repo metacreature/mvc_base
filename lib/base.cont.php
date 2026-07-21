@@ -25,9 +25,6 @@
 */
 
 
-require_once ('fw/FW_Ajax_Form.class.php');
-require_once ('languagelist.inc.php');
-
 class Controller_Base
 {
     protected $_db = null;
@@ -48,12 +45,14 @@ class Controller_Base
         
         if (SETTINGS_LOGIN_ENABLED) {
             if (SETTINGS_LOGIN_REMEMBER_ENABLED && empty($_SESSION['login']) && !empty($_COOKIE['remember_token'])) {
-                $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
+                
+                require_once (DOCUMENT_ROOT . '/models/user.model.php');
+
+                $user_obj = new Model_User($this->_db);
+                $user_obj->setUserId(Controller_Base::getUserId());
                 $data = $user_obj->loginRememberToken($_COOKIE['remember_token']);
                 if ($data) {
-                    $_SESSION['login'] = true;
-                    $_SESSION['user_id'] = $data['user_id'];
-                    $_SESSION['user_name'] = $data['user_name'];
+                    $_SESSION = array_merge($_SESSION, $data);
                 } else {
                     setcookie("remember_token", '', 1, "/", WEB_DOMAIN);
                 }
@@ -61,6 +60,9 @@ class Controller_Base
         } else {
             $_SESSION['login'] = false;
         }
+
+        require_once ('fw/FW_Ajax_Form.class.php');
+        require_once ('languagelist.inc.php');
 
         // language
         $selected_lang = SETTINGS_LANG_DEFAULT;
@@ -91,7 +93,8 @@ class Controller_Base
 
     protected function _logout() {
         if (!empty($_COOKIE['remember_token'])) {
-            $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
+            $user_obj = new Model_User($this->_db);
+            $user_obj->setUserId(Controller_Base::getUserId());
             $user_obj->removeRememberToken($_COOKIE['remember_token']);
             setcookie("remember_token", '', 1, "/", WEB_DOMAIN);
         }
@@ -109,19 +112,19 @@ class Controller_Base
         $_SESSION['session_started'] = true;
     }
 
-    protected static function is_login() {
+    protected static function isLogin() {
         return !empty($_SESSION) && !empty($_SESSION['login']);
     }
 
-    protected static function get_user_id() {
+    protected static function getUserId() {
         return !empty($_SESSION) && !empty($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
     }
     
-    protected static function get_user_name() {
+    protected static function getUserName() {
         return !empty($_SESSION) && !empty($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
     }
 
-    protected function _check_login() {
+    protected function _checkLogin() {
         if (!in_array('login', $_SESSION) || !$_SESSION['login']) {
             @session_destroy();
             if (strpos($_SERVER['HTTP_ACCEPT'], 'application/json') === false) {
@@ -140,17 +143,18 @@ class Controller_Base
         }
     }
 
-    protected function _add_create_password_fields($form) {
+    protected function _addPasswordFields($form) {
         $field_type = SETTINGS_REGISTER_USER_DEFINED_PASSWORDS ? 'Password' : 'Hidden';
 
         $form->addField($field_type, 'password', true)
             ->setMinLength(8)
             ->setFieldErrors(['external' => LANG_FIELD_USER_PASSWORD_ERROR]);
         $form->addField($field_type, 'password_confirmation', true)
+            ->setHelper(true)
             ->setFieldErrors(['external' => LANG_FIELD_USER_REPEAT_PASSWORD_ERROR]);
     }
 
-    protected function _validate_create_password_form($form) {
+    protected function _validatePasswordFields($form) {
         $valid = $form->validate();
         $password = $form->getField('password');
         if ($password->isValid()) {

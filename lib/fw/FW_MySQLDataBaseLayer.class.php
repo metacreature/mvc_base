@@ -125,7 +125,7 @@ class FW_MySqlDataBaseLayer
             if (preg_match('#^[a-z0-9_`]*$#i', $sFieldName)) {
                 $sql[] = $sFieldName . ' = ?';
             } else {
-                throw new Exception('prepareArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
+                throw new Exception('FW_MySqlDataBaseLayer::prepareArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
             }
         }
         return implode(', ', $sql);
@@ -158,7 +158,7 @@ class FW_MySqlDataBaseLayer
             if (preg_match('#^[a-z0-9_`]*$#i', $sFieldName)) {
                 $arrAssocData[$sFieldName] = $sFieldName . ' = ' . $this->escape($mValue);
             } else {
-                throw new Exception('escapeArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
+                throw new Exception('FW_MySqlDataBaseLayer::escapeArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
             }
         }
         return implode(', ', $arrAssocData);
@@ -220,7 +220,7 @@ class FW_MySqlDataBaseLayer
     
     function getError($iRn = 0)
     {
-        return $this->_arrError[$iRn];
+        return !empty($this->_arrError[$iRn]) ? $this->_arrError[$iRn] : null;
     }
 
 

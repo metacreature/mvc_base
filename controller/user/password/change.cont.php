@@ -33,29 +33,30 @@ require_once (DOCUMENT_ROOT . '/lib/fw/FW_Email.class.php');
 class Controller_User_Password_Change extends Controller_Base
 {
     function __construct($db) {
-        $this->_forbidden(!SETTINGS_LOGIN_ENABLED);
+        $this->_forbidden(!SETTINGS_LOGIN_ENABLED || empty($_REQUEST['token']));
         parent::__construct($db);
     }
 
-    protected function _get_form() {
+    protected function _getForm() {
         $form = new FW_Ajax_Form('password_change_form', false);
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
         $form->addField('Hidden', 'token', true);
-        $this->_add_create_password_fields($form);
+        $this->_addPasswordFields($form);
         return $form;
     }
  
     function view() {
-        $form = $this->_get_form();
+        $this->_logout();
+        $form = $this->_getForm();
         $form->resolveRequest();
         require_once (DOCUMENT_ROOT . '/views/user/password.change.view.html');
     }
 
     function submit() {
-        $form = $this->_get_form();
+        $form = $this->_getForm();
         $form->resolveRequest();
 
-        if (!$this->_validate_create_password_form($form)) {
+        if (!$this->_validatePasswordFields($form)) {
             return $form->getFormError(LANG_FORM_INVALID);
         }
         if (!$this->_validateCaptcha($_POST)) {
@@ -64,8 +65,8 @@ class Controller_User_Password_Change extends Controller_Base
 
         usleep(rand(2154755, 6367810));
 
-        $user_obj = new Model_User($this->_db, 0);
-        $res = $user_obj->forgotten_change($form->getValue('token'), $form->getValue('password'));
+        $user_obj = new Model_User($this->_db);
+        $res = $user_obj->changeForgotten($form->getValue('token'), $form->getValue('password'));
         if($res) {
             return $form->getFormSuccess(LANG_PASSWORD_CHANGE_SUCCESS);
         }

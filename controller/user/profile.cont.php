@@ -33,7 +33,7 @@ class Controller_User_Profile extends Controller_Base
     function __construct($db) {
         $this->_forbidden(!SETTINGS_LOGIN_ENABLED);
         parent::__construct($db);
-        $this->_check_login();
+        $this->_checkLogin();
     }
 
     protected function _get_profile_form() {
@@ -56,12 +56,13 @@ class Controller_User_Profile extends Controller_Base
         $form = new FW_Ajax_Form('password_form', false);
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
         $form->addField('Password', 'actual_password', true);
-        $this->_add_create_password_fields($form);
+        $this->_addPasswordFields($form);
         return $form;
     }
 
     function view() {
-        $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
+        $user_obj = new Model_User($this->_db);
+        $user_obj->setUserId(Controller_Base::getUserId());
         $data = $user_obj->get();
         $profile_form = $this->_get_profile_form();
         $profile_form->resolveRequest($data);
@@ -75,11 +76,11 @@ class Controller_User_Profile extends Controller_Base
         $form = $this->_get_profile_form();
         $form->resolveRequest();
         if ($form->validate()) {
-            $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
-            $res = $user_obj->update_profile(
-                $form->getValue('user_name'));
+            $user_obj = new Model_User($this->_db);
+            $user_obj->setUserId(Controller_Base::getUserId());
+            $res = $user_obj->updateProfile($form->getValues());
             if ($res) {
-                $_SESSION['user_name'] = $form->getValue('user_name');
+                $_SESSION = array_merge($_SESSION, $form->getValues());
                 return $form->getFormSuccess(LANG_PROFILE_SUCCESS);
             }
             $db_error = $this->_db->getError();
@@ -97,8 +98,9 @@ class Controller_User_Profile extends Controller_Base
         $form = $this->_get_email_form();
         $form->resolveRequest();
         if ($form->validate()) {
-            $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
-            $res = $user_obj->update_email(
+            $user_obj = new Model_User($this->_db);
+            $user_obj->setUserId(Controller_Base::getUserId());
+            $res = $user_obj->updateEmail(
                 $form->getValue('actual_password'),
                 $form->getValue('user_email'));
             if ($res) {
@@ -120,9 +122,10 @@ class Controller_User_Profile extends Controller_Base
     function update_password() {
         $form = $this->_get_password_form();
         $form->resolveRequest();
-        if ($this->_validate_create_password_form($form)) {
-            $user_obj = new Model_User($this->_db, Controller_Base::get_user_id());
-            $res = $user_obj->update_password(
+        if ($this->_validatePasswordFields($form)) {
+            $user_obj = new Model_User($this->_db);
+            $user_obj->setUserId(Controller_Base::getUserId());
+            $res = $user_obj->updatePassword(
                 $form->getValue('actual_password'),
                 $form->getValue('password'));
             if ($res) {

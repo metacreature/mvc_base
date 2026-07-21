@@ -29,67 +29,134 @@ require_once (DOCUMENT_ROOT . '/lib/base.model.php');
 
 class Model_User extends Model_Base{
 
-    protected function _crypt_password($password) {
+    protected $_user_id = null;
+
+    function setUserId($user_id) {
+        $this->_user_id = $user_id ? (int)$user_id : 0;
+        return $this; 
+    }
+
+    protected function _cryptPassword($password) {
         return hash('sha512', SECURITY_SALT . $password . SECURITY_SALT . $password);
     }
 
-    protected function _calc_remember_token($user_token) {
+    protected function _calcRememberToken($user_token) {
         $ip = SECURITY_LOGIN_USE_IP ? $_SERVER['REMOTE_ADDR'] : '';
         $user_agent = SECURITY_LOGIN_USE_USER_AGENT ? $_SERVER['HTTP_USER_AGENT'] : '';
         return create_db_token($user_token, $_SERVER['HTTP_ACCEPT_LANGUAGE']. $user_agent . $ip);
     }
 
-    function addRememberToken($password) {
-        $user_token = create_user_token($this->_crypt_password($password),  $_SERVER['REMOTE_ADDR']);
-        $db_token = $this->_calc_remember_token($user_token);
-
-        $res = $this->_db->executeQuery(
-            'INSERT INTO tbl_user_remember (user_id, db_token, insert_timestamp) VALUES (?, ?, NOW());',
-            [$this->_user_id, $db_token]
-        );
-        return $user_token;
+    protected function _cleanGetData(&$data) {
+        unset($data['password']);
     }
 
-    function removeRememberToken($user_token) {
-        $db_token = $this->_calc_remember_token($user_token);
-        $res = $this->_db->executeQuery(
-            'DELETE FROM tbl_user_remember WHERE db_token = ?;',
-            [$db_token]
-        );
+    protected function _cleanPutData(&$data) {
+        unset($data['login_timestamp']);
+        $this->_cleanBasePutData($data, 'user_id');
     }
 
-    function loginRememberToken($user_token) {
-        $db_token = $this->_calc_remember_token($user_token);
-        $res = $this->_db->executeQuery(
-            'SELECT * FROM tbl_user WHERE user_id IN (SELECT user_id FROM tbl_user_remember WHERE db_token = ? AND insert_timestamp > NOW() - INTERVAL ? day);',
-            [$db_token, SETTINGS_LOGIN_REMEMBER_EXPIRE]);
-        if ($res) {
-            $data = $this->_db->fetchAssoc();
-            if ($data) {
-                $this->setUserId($data['user_id']);
-                return $data;
-            }
-        }
-    }
-
-    function get() {
+    function get($user_id = null) {
         $res = $this->_db->executeQuery(
             'SELECT * FROM tbl_user WHERE user_id = ?;',
-            [$this->_user_id]);
+            [$user_id ? $user_id : $this->_user_id]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             if ($data) {
+                $this->_cleanGetData($data);
                 return $data;
             }
         }
+    }
+
+    function create($data) {
+        if (empty($data['user_name'])
+         || empty($data['user_email'])
+         || empty($data['password'])) {
+            return false;
+        }
+
+        $this->_cleanPutData($data);
+        $data['lower_user_name'] = strtolower($data['user_name']);
+        $data['lower_user_email'] = strtolower($data['user_email']);
+        $data['password'] = $this->_cryptPassword($data['password']);
+
+        return $this->_db->executeQuery(
+            'INSERT INTO tbl_user SET 
+            '.$this->_db->prepareArrayToSet($data).',
+            insert_timestamp = NOW();',
+            array_values($data));
+    }
+
+    function updateProfile($data) {
+        unset($data['password']);
+        unset($data['user_email']);
+        unset($data['lower_user_email']);
+        unset($data['is_admin']);
+        unset($data['block_login']);
+        $this->_cleanPutData($data);
+
+        if (count($data) == 0) {
+            return false;
+        }
+
+        if (array_key_exists('user_name', $data)) {
+            $data['lower_user_name'] = strtolower($data['user_name']);
+        }
+
+        $res = $this->_db->executeQuery(
+            'UPDATE tbl_user SET 
+                '.$this->_db->prepareArrayToSet($data).',
+                update_timestamp = NOW(),
+                cnt_update = cnt_update + 1
+            WHERE user_id = ?;',
+            array_merge(array_values($data), [$this->_user_id]));
+        if ($res) {
+            if ($this->_db->getAffectedRows() == 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function updateEmail($actual_password, $user_email) {
+        $res = $this->_db->executeQuery(
+            'UPDATE tbl_user SET 
+                user_email = ?,
+                lower_user_email = ?,
+                update_timestamp = NOW(),
+                cnt_update = cnt_update + 1
+            WHERE user_id = ? AND password = ?;',
+            [$user_email, strtolower($user_email), $this->_user_id, $this->_cryptPassword($actual_password)]);
+        if ($res) {
+            if ($this->_db->getAffectedRows() == 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function updatePassword($actual_password, $password) {
+        $res = $this->_db->executeQuery(
+            'UPDATE tbl_user SET 
+                password = ?,
+                update_timestamp = NOW(),
+                cnt_update = cnt_update + 1
+            WHERE user_id = ? AND password = ?;',
+            [$this->_cryptPassword($password), $this->_user_id, $this->_cryptPassword($actual_password)]);
+        if ($res) {
+            if ($this->_db->getAffectedRows() == 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function login($user_email, $password, $as_admin = false) {
 
         $cnt_bruteforce = 0;
         $res = $this->_db->executeQuery(
-            'SELECT count(*) as cnt FROM tbl_user_login_bruteforce WHERE lower_user_email = LOWER(?) AND insert_timestamp > NOW() - INTERVAL ? MINUTE;',
-            [$user_email, SETTINGS_LOGIN_BRUTEFORCE_EXPIRE * 60]);
+            'SELECT count(*) as cnt FROM tbl_user_login_bruteforce WHERE lower_user_email = ? AND insert_timestamp > NOW() - INTERVAL ? MINUTE;',
+            [strtolower($user_email), SETTINGS_LOGIN_BRUTEFORCE_EXPIRE * 60]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             $cnt_bruteforce = $data['cnt'];
@@ -100,16 +167,18 @@ class Model_User extends Model_Base{
 
         $sql_admin = $as_admin ? ' AND is_admin = 1 ' : '';
         $res = $this->_db->executeQuery(
-            'SELECT * FROM tbl_user WHERE lower_user_email = LOWER(?) AND password = ? '.$sql_admin.';',
-            [$user_email, $this->_crypt_password($password)]);
+            'SELECT * FROM tbl_user WHERE block_login = 0 AND lower_user_email = ? AND password = ? '.$sql_admin.';',
+            [strtolower($user_email), $this->_cryptPassword($password)]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             if ($data) {
+                
                 $this->setUserId($data['user_id']);
+                $this->_cleanGetData($data);
 
-                unset($data['password']);
-                unset($data['update_timestamp']);
-                unset($data['cnt_update']);
+                if (SETTINGS_LOGIN_LOG_TIME) {
+                    $this->_db->executeQuery('UPDATE tbl_user SET last_login = NOW() WHERE user_id = ?;', array($this->_user_id));
+                }
 
                 if (!$as_admin) {
                     $data['is_admin'] = false;
@@ -119,34 +188,69 @@ class Model_User extends Model_Base{
                 $data['login'] = true;
 
                 $this->_db->executeQuery(
-                    'DELETE FROM tbl_user_login_bruteforce WHERE lower_user_email = LOWER(?);',
-                    [$user_email]);
+                    'DELETE FROM tbl_user_login_bruteforce WHERE lower_user_email = ?;',
+                    [strtolower($user_email)]);
                     
                 return $data;
             }
         }
 
         $this->_db->executeQuery(
-            'INSERT INTO tbl_user_login_bruteforce SET lower_user_email = LOWER(?), insert_timestamp = NOW();',
-            [$user_email]);
+            'INSERT INTO tbl_user_login_bruteforce SET lower_user_email = ?, insert_timestamp = NOW();',
+            [strtolower($user_email)]);
         
         if ($cnt_bruteforce + 1 >= SETTINGS_LOGIN_BRUTEFORCE_CNT) {
             return false;
         }
     }
 
-    function create($user_name, $user_email, $password) {
-        return $this->_db->executeQuery(
-            'INSERT INTO tbl_user (user_name, lower_user_name, user_email, lower_user_email, password, insert_timestamp, update_timestamp) VALUES (?,LOWER(?),?,LOWER(?),?, NOW(), NOW())',
-            [$user_name, $user_name, $user_email, $user_email, $this->_crypt_password($password)]);
-    }
-
-    
-    function forgotten($user_email) {
+    function addRememberToken($password) {
+        $user_token = create_user_token($this->_cryptPassword($password),  $_SERVER['REMOTE_ADDR']);
+        $db_token = $this->_calcRememberToken($user_token);
 
         $res = $this->_db->executeQuery(
-            'SELECT user_id, user_name, user_email, password FROM tbl_user WHERE lower_user_email = LOWER(?);',
-            [$user_email]);
+            'INSERT INTO tbl_user_remember (user_id, db_token, insert_timestamp) VALUES (?, ?, NOW());',
+            [$this->_user_id, $db_token]
+        );
+        return $user_token;
+    }
+
+    function removeRememberToken($user_token) {
+        $db_token = $this->_calcRememberToken($user_token);
+        $res = $this->_db->executeQuery(
+            'DELETE FROM tbl_user_remember WHERE db_token = ?;',
+            [$db_token]
+        );
+    }
+
+    function loginRememberToken($user_token) {
+        $db_token = $this->_calcRememberToken($user_token);
+        $res = $this->_db->executeQuery(
+            'SELECT * FROM tbl_user WHERE user_id IN (SELECT user_id FROM tbl_user_remember WHERE db_token = ? AND insert_timestamp > NOW() - INTERVAL ? day);',
+            [$db_token, SETTINGS_LOGIN_REMEMBER_EXPIRE]);
+        if ($res) {
+            $data = $this->_db->fetchAssoc();
+            if ($data) {
+                $this->setUserId($data['user_id']);
+                $this->_cleanGetData($data);
+
+                if (SETTINGS_LOGIN_LOG_TIME) {
+                    $this->_db->executeQuery('UPDATE tbl_user SET last_login = NOW() WHERE user_id = ?;', array($this->_user_id));
+                }
+
+                $data['is_admin'] = false;
+                $data['login'] = true;
+
+                return $data;
+            }
+        }
+    }
+    
+    function requestForgotten($user_email) {
+
+        $res = $this->_db->executeQuery(
+            'SELECT user_id, user_name, user_email, password FROM tbl_user WHERE lower_user_email = ?;',
+            [strtolower($user_email)]);
         if ($res) {
             $data = $this->_db->fetchAssoc();
             if ($data) {
@@ -171,7 +275,7 @@ class Model_User extends Model_Base{
         }
     }
 
-    function forgotten_change($user_token, $password) {
+    function changeForgotten($user_token, $password) {
 
         $db_token = create_db_token($user_token, $_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
         $res = $this->_db->executeQuery(
@@ -180,7 +284,7 @@ class Model_User extends Model_Base{
                 update_timestamp = NOW(),
                 cnt_update = cnt_update + 1
             WHERE user_id IN (SELECT user_id FROM tbl_user_forgotten WHERE db_token = ? AND insert_timestamp > NOW() - INTERVAL ? MINUTE);',
-            [$this->_crypt_password($password), $db_token, SETTINGS_FORGOTTEN_PASSWORD_EXPIRE]);
+            [$this->_cryptPassword($password), $db_token, SETTINGS_FORGOTTEN_PASSWORD_EXPIRE]);
         if ($res) {
             if ($this->_db->getAffectedRows() == 1) {
 
@@ -193,56 +297,6 @@ class Model_User extends Model_Base{
                     'DELETE FROM tbl_user_forgotten WHERE db_token = ?;',
                     [$db_token]);
                     
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function update_profile($user_name) {
-        $res = $this->_db->executeQuery(
-            'UPDATE tbl_user SET 
-                user_name = ?,
-                lower_user_name = LOWER(?),
-                update_timestamp = NOW(),
-                cnt_update = cnt_update + 1
-            WHERE user_id = ?;',
-            [$user_name, $user_name, $this->_user_id]);
-        if ($res) {
-            if ($this->_db->getAffectedRows() == 1) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function update_email($actual_password, $user_email) {
-        $res = $this->_db->executeQuery(
-            'UPDATE tbl_user SET 
-                user_email = ?,
-                lower_user_email = LOWER(?),
-                update_timestamp = NOW(),
-                cnt_update = cnt_update + 1
-            WHERE user_id = ? AND password = ?;',
-            [$user_email, $user_email, $this->_user_id, $this->_crypt_password($actual_password)]);
-        if ($res) {
-            if ($this->_db->getAffectedRows() == 1) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function update_password($actual_password, $password) {
-        $res = $this->_db->executeQuery(
-            'UPDATE tbl_user SET 
-                password = ?,
-                update_timestamp = NOW(),
-                cnt_update = cnt_update + 1
-            WHERE user_id = ? AND password = ?;',
-            [$this->_crypt_password($password), $this->_user_id, $this->_crypt_password($actual_password)]);
-        if ($res) {
-            if ($this->_db->getAffectedRows() == 1) {
                 return true;
             }
         }

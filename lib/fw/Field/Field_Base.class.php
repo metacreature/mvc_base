@@ -36,7 +36,7 @@ abstract class Field_Base
 
     protected $_mValue = '';
 
-    protected $_bHelper = true;
+    protected $_bHelper = false;
 
     protected $_bMandatory = false;
 

@@ -35,34 +35,31 @@ class Controller_User_Register extends Controller_Base
         parent::__construct($db);
     }
 
-    protected function _get_form() {
+    protected function _getForm() {
         $form = new FW_Ajax_Form('register_form', false);
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
         $form->addField('Text', 'user_name', true)
             ->setMinLength(6);
         $form->addField('Email', 'user_email', true);
-        $this->_add_create_password_fields($form);
+        $this->_addPasswordFields($form);
         return $form;
     }
 
     function view() {
         $this->_logout();
-        $form = $this->_get_form();
+        $form = $this->_getForm();
         require_once (DOCUMENT_ROOT . '/views/user/register.view.html');
     }
 
     function save() {
-        $form = $this->_get_form();
+        $form = $this->_getForm();
         $form->resolveRequest();
-        if ($this->_validate_create_password_form($form)) {
+        if ($this->_validatePasswordFields($form)) {
             if (!$this->_validateCaptcha($_POST)) {
                 return $form->getFormError(LANG_CAPTCHA_INVALID); 
             }
-            $user_obj = new Model_User($this->_db, 0);
-            $res = $user_obj->create(
-                $form->getValue('user_name'),
-                $form->getValue('user_email'), 
-                $form->getValue('password'));
+            $user_obj = new Model_User($this->_db);
+            $res = $user_obj->create($form->getValues());
             if ($res) {
                 return $form->getFormSuccess(LANG_REGISTER_SUCCESS);
             }

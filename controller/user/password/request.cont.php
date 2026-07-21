@@ -37,7 +37,7 @@ class Controller_User_Password_Request extends Controller_Base
         parent::__construct($db);
     }
 
-    protected function _get_form() {
+    protected function _getForm() {
         $form = new FW_Ajax_Form('forgotten_form', false);
         $form->setFieldErrors(LANG_FORMFIELD_ERRORS);
         $form->addField('Email', 'user_email', true);
@@ -46,12 +46,12 @@ class Controller_User_Password_Request extends Controller_Base
 
     function view() {
         $this->_logout();
-        $form = $this->_get_form();
+        $form = $this->_getForm();
         require_once (DOCUMENT_ROOT . '/views/user/password.request.view.html');
     }
 
     function submit() {
-        $form = $this->_get_form();
+        $form = $this->_getForm();
         $form->resolveRequest();
 
         if (!$form->validate($form)) {
@@ -63,8 +63,8 @@ class Controller_User_Password_Request extends Controller_Base
         
         usleep(rand(2154755, 6367810));
 
-        $user_obj = new Model_User($this->_db, 0);
-        $data = $user_obj->forgotten($form->getValue('user_email'));
+        $user_obj = new Model_User($this->_db);
+        $data = $user_obj->requestForgotten($form->getValue('user_email'));
         if ($data) {
 
             $change_url = WEB_URL . '/user/password/change?token=' .$data['user_token'];         
