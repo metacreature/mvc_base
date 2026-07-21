@@ -1,6 +1,10 @@
+/* ########################################## */
+/* ############### user */
+/* ########################################## */
 
 CREATE TABLE tbl_user (
   user_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+
   user_name VARCHAR(255) NOT NULL,
   lower_user_name VARCHAR(255) NOT NULL,
   user_email VARCHAR(255) NOT NULL,
@@ -9,33 +13,45 @@ CREATE TABLE tbl_user (
   is_admin INT(1) NOT NULL DEFAULT '0',
   block_login INT(1) NOT NULL DEFAULT '0',
   last_login  DATETIME,
-  insert_timestamp  DATETIME NOT NULL,
+
+  insert_timestamp  DATETIME NOT NULL DEFAULT NOW(),
+  insert_key BIGINT UNSIGNED,
   update_timestamp  DATETIME,
   cnt_update INT UNSIGNED NOT NULL DEFAULT '0',
+
   PRIMARY KEY (user_id),
   UNIQUE KEY lower_user_name(lower_user_name),
   UNIQUE KEY lower_user_email(lower_user_email)
 ) CHARACTER SET utf8 COLLATE utf8_general_ci;
 
+/* ########################################## */
+
 CREATE TABLE tbl_user_remember(
   user_id INT UNSIGNED NOT NULL,
   db_token CHAR(150) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
-  insert_timestamp  DATETIME NOT NULL,
+  insert_timestamp  DATETIME NOT NULL DEFAULT NOW(),
+
   FOREIGN KEY (user_id) REFERENCES tbl_user (user_id),
   INDEX db_token (db_token(10))
 ) CHARACTER SET ascii COLLATE ascii_general_ci;
+
+/* ########################################## */
 
 CREATE TABLE tbl_user_forgotten(
   user_id INT UNSIGNED NOT NULL,
   db_token CHAR(150) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
-  insert_timestamp  DATETIME NOT NULL,
+  insert_timestamp  DATETIME NOT NULL DEFAULT NOW(),
+
   FOREIGN KEY (user_id) REFERENCES tbl_user (user_id),
   INDEX db_token (db_token(10))
 ) CHARACTER SET ascii COLLATE ascii_general_ci;
 
+/* ########################################## */
+
 CREATE TABLE tbl_user_login_bruteforce(
   lower_user_email VARCHAR(255) NOT NULL,
-  insert_timestamp  DATETIME NOT NULL,
+  insert_timestamp  DATETIME NOT NULL DEFAULT NOW(),
+
   INDEX insert_timestamp (insert_timestamp)
 ) CHARACTER SET utf8 COLLATE utf8_general_ci;
 

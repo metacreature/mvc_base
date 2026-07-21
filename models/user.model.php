@@ -47,12 +47,7 @@ class Model_User extends Model_Base{
     }
 
     protected function _cleanGetData(&$data) {
-        unset($data['password']);
-    }
-
-    protected function _cleanPutData(&$data) {
-        unset($data['login_timestamp']);
-        $this->_cleanBasePutData($data, 'user_id');
+        FW_MySQL::cleanHelper($data, ['password']);
     }
 
     function get($user_id = null) {
@@ -75,80 +70,67 @@ class Model_User extends Model_Base{
             return false;
         }
 
-        $this->_cleanPutData($data);
+        FW_MySQL::cleanHelper($data, ['login_timestamp']);
+
         $data['lower_user_name'] = strtolower($data['user_name']);
         $data['lower_user_email'] = strtolower($data['user_email']);
         $data['password'] = $this->_cryptPassword($data['password']);
 
-        return $this->_db->executeQuery(
-            'INSERT INTO tbl_user SET 
-            '.FW_MySQL::prepareArrayToSet($data).',
-            insert_timestamp = NOW();',
-            array_values($data));
+        return $this->_db->insertHelper('tbl_user', 'user_id', $data);
+    }
+
+    function update($data, $user_id) {
+        FW_MySQL::cleanHelper($data, ['login_timestamp']);
+
+        if (array_key_exists('user_name', $data)) {
+            $data['lower_user_name'] = strtolower($data['user_name']);
+        }
+        if (array_key_exists('user_email', $data)) {
+            $data['lower_user_email'] = strtolower($data['user_email']);
+        }
+        if (array_key_exists('password', $data)) {
+            $data['password'] = $this->_cryptPassword($data['password']);
+        }
+
+        $res = $this->_db->updateHelper('tbl_user', 'user_id', $data, 'user_id = ?', [$user_id]);
+        return $res === 1;
     }
 
     function updateProfile($data) {
-        unset($data['password']);
-        unset($data['user_email']);
-        unset($data['lower_user_email']);
-        unset($data['is_admin']);
-        unset($data['block_login']);
-        $this->_cleanPutData($data);
-
-        if (count($data) == 0) {
-            return false;
-        }
+        FW_MySQL::cleanHelper($data, [
+            'password',
+            'user_email',
+            'lower_user_email',
+            'is_admin',
+            'block_login',
+            'login_timestamp'
+        ]);
 
         if (array_key_exists('user_name', $data)) {
             $data['lower_user_name'] = strtolower($data['user_name']);
         }
 
-        $res = $this->_db->executeQuery(
-            'UPDATE tbl_user SET 
-                '.FW_MySQL::prepareArrayToSet($data).',
-                update_timestamp = NOW(),
-                cnt_update = cnt_update + 1
-            WHERE user_id = ?;',
-            array_merge(array_values($data), [$this->_user_id]));
-        if ($res) {
-            if ($this->_db->getAffectedRows() == 1) {
-                return true;
-            }
-        }
-        return false;
+        $res = $this->_db->updateHelper('tbl_user', 'user_id', $data, 'user_id = ?', [$this->_user_id]);
+        return $res === 1;
     }
 
     function updateEmail($actual_password, $user_email) {
-        $res = $this->_db->executeQuery(
-            'UPDATE tbl_user SET 
-                user_email = ?,
-                lower_user_email = ?,
-                update_timestamp = NOW(),
-                cnt_update = cnt_update + 1
-            WHERE user_id = ? AND password = ?;',
-            [$user_email, strtolower($user_email), $this->_user_id, $this->_cryptPassword($actual_password)]);
-        if ($res) {
-            if ($this->_db->getAffectedRows() == 1) {
-                return true;
-            }
-        }
-        return false;
+        $data = [
+            'user_email' => $user_email,
+            'lower_user_email' => strtolower($user_email)
+        ];
+
+        $res = $this->_db->updateHelper('tbl_user', 'user_id', $data, 
+            'user_id = ? AND password = ?', [$this->_user_id, $this->_cryptPassword($actual_password)]);
+        return $res === 1;
     }
 
     function updatePassword($actual_password, $password) {
-        $res = $this->_db->executeQuery(
-            'UPDATE tbl_user SET 
-                password = ?,
-                update_timestamp = NOW(),
-                cnt_update = cnt_update + 1
-            WHERE user_id = ? AND password = ?;',
-            [$this->_cryptPassword($password), $this->_user_id, $this->_cryptPassword($actual_password)]);
-        if ($res) {
-            if ($this->_db->getAffectedRows() == 1) {
-                return true;
-            }
-        }
-        return false;
+        $data = ['password' => $this->_cryptPassword($password)];
+
+        $res = $this->_db->updateHelper('tbl_user', 'user_id', $data, 
+            'user_id = ? AND password = ?', [$this->_user_id, $this->_cryptPassword($actual_password)]);
+        return $res === 1;
     }
 
     function login($user_email, $password, $as_admin = false) {
@@ -196,7 +178,7 @@ class Model_User extends Model_Base{
         }
 
         $this->_db->executeQuery(
-            'INSERT INTO tbl_user_login_bruteforce SET lower_user_email = ?, insert_timestamp = NOW();',
+            'INSERT INTO tbl_user_login_bruteforce SET lower_user_email = ?;',
             [strtolower($user_email)]);
         
         if ($cnt_bruteforce + 1 >= SETTINGS_LOGIN_BRUTEFORCE_CNT) {
@@ -209,7 +191,7 @@ class Model_User extends Model_Base{
         $db_token = $this->_calcRememberToken($user_token);
 
         $res = $this->_db->executeQuery(
-            'INSERT INTO tbl_user_remember (user_id, db_token, insert_timestamp) VALUES (?, ?, NOW());',
+            'INSERT INTO tbl_user_remember SET user_id = ?, db_token = ?;',
             [$this->_user_id, $db_token]
         );
         return $user_token;
@@ -266,7 +248,7 @@ class Model_User extends Model_Base{
                 $user_token = create_user_token($data['password'],  $_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
                 $db_token = create_db_token($user_token, $_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
                 $res = $this->_db->executeQuery(
-                    'INSERT INTO tbl_user_forgotten (user_id, db_token, insert_timestamp) VALUES (?, ?, NOW());',
+                    'INSERT INTO tbl_user_forgotten SET user_id = ?, db_token = ?;',
                     [$data['user_id'], $db_token]
                 );
 

@@ -94,6 +94,10 @@ class FW_MySQL
         $this->close();
     }
 
+    function isPersistent() {
+        return $this->_connectionCrededentials['persistent'];
+    }
+
     // ========== Connection-Methods ========== //
 
     function connect()
@@ -140,17 +144,61 @@ class FW_MySQL
 
     // ============= Helper =================== //
 
-    static function prepareArrayToSet($arrAssocData)
+    static function cleanHelper(&$data, $clean_columns) {
+        foreach($clean_columns as $col) {
+            unset($data[$col]);
+        }
+    }
+
+    static function cleanBasePutData(&$data, $primary_key) {
+        self::cleanHelper($data, [
+            $primary_key,
+            'insert_timestamp',
+            'insert_key',
+            'update_timestamp',
+            'cnt_update',
+        ]);
+    }
+
+    static function prepareArrayInsert($arrAssocData)
+    {
+        $sql = array();
+        foreach ($arrAssocData as $sFieldName => $mValue) {
+            if (preg_match('#^[a-z0-9_`]*$#i', $sFieldName)) {
+                $sql[] = $sFieldName;
+            } else {
+                throw new Exception('FW_MySQL::prepareArrayInsert -> "'. $sFieldName . '" is not a valid field name!');
+            }
+        }
+        return implode(', ', $sql);
+    }
+
+    static function prepareAssocArray($arrAssocData)
     {
         $sql = array();
         foreach ($arrAssocData as $sFieldName => $mValue) {
             if (preg_match('#^[a-z0-9_`]*$#i', $sFieldName)) {
                 $sql[] = $sFieldName . ' = ?';
             } else {
-                throw new Exception('FW_MySQL::prepareArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
+                throw new Exception('FW_MySQL::prepareArray -> "'. $sFieldName . '" is not a valid field name!');
             }
         }
-        return implode(', ', $sql);
+        return $sql;
+    }
+
+    static function prepareArrayToSet($arrAssocData)
+    {
+        return implode(', ', self::prepareAssocArray($arrAssocData));
+    }
+
+    static function prepareArrayToAnd($arrAssocData)
+    {
+        return implode(' AND ', self::prepareAssocArray($arrAssocData));
+    }
+
+    static function prepareArrayToOr($arrAssocData)
+    {
+        return implode(' OR ', self::prepareAssocArray($arrAssocData));
     }
 
     static function prepareArrayToIn($arrData)
@@ -175,16 +223,32 @@ class FW_MySQL
         return $arrData;
     }
 
-    static function escapeArrayToSet($arrAssocData)
+    static function escapeAssocArray($arrAssocData)
     {
+        $sql = array();
         foreach ($arrAssocData as $sFieldName => $mValue) {
             if (preg_match('#^[a-z0-9_`]*$#i', $sFieldName)) {
-                $arrAssocData[$sFieldName] = $sFieldName . ' = ' . $this->escape($mValue);
+                $sql[] = $sFieldName . ' = ' . $this->escape($mValue);
             } else {
-                throw new Exception('FW_MySQL::escapeArrayToSet -> "'. $sFieldName . '" is not a valid field name!');
+                throw new Exception('FW_MySQL::escapeArray -> "'. $sFieldName . '" is not a valid field name!');
             }
         }
-        return implode(', ', $arrAssocData);
+        return $sql;
+    }
+
+    static function escapeArrayToSet($arrAssocData)
+    {
+        return implode(', ', self::escapeAssocArray($arrAssocData));
+    }
+
+    static function escapeArrayToAnd($arrAssocData)
+    {
+        return implode(' AND ', self::escapeAssocArray($arrAssocData));
+    }
+
+    static function escapeArrayToOr($arrAssocData)
+    {
+        return implode(' OR ', self::escapeAssocArray($arrAssocData));
     }
 
     static function escapeArrayToIn($arrData)
@@ -241,6 +305,93 @@ class FW_MySQL
 		<br>(ERROR)' . $this->_arrError[$iRn] . '</b>';
         $this->_arrLog[] = $sError;
         
+        return false;
+    }
+
+    // insert helper to get the primary-key afterwards for persistent db-connections
+    function insertHelper($table_name, $primary_key, $data, $query_columns = null) 
+    {
+        self::cleanBasePutData($data, $primary_key);
+
+        if (!count($data)) {
+            return false;
+        }
+
+        $is_persistent = $this->isPersistent();
+
+        if (!is_array($query_columns) || !$is_persistent) {
+            $res = $this->executeQuery(
+                'INSERT INTO '.$table_name.' SET '.self::prepareArrayToSet($data).';',
+                array_values($data));
+
+            if (!$res || !is_array($query_columns)) {
+                return $res;
+            }
+
+            return $this->getLastInsertId();
+        }
+
+        $data['insert_key'] = hrtime(true);
+        $query_columns[] = 'insert_key';
+        $query = array_intersect_key($data, array_flip($query_columns));
+
+        $res = $this->executeQuery(
+                'INSERT INTO '.$table_name.' SET '.self::prepareArrayToSet($data).';',
+                array_values($data));
+        if ($res) {
+            $res = $this->executeQuery('SELECT max('.$primary_key.') FROM '.$table_name.' 
+                WHERE '.self::prepareArrayToAnd($query).';',
+                array_values($query));
+            if ($res) {
+                $id = $this->fetchRow();
+                if ($id) {
+                    return $id[0];
+                }
+            }
+        }
+        return false;
+    }
+
+    function insertMultipleHelper($table_name, $primary_key, $data) 
+    {
+        if (!count($data)) {
+            return false;
+        }
+
+        $placeholder = array();
+        $values = array();
+        foreach (array_keys($data) as $i) {
+            self::cleanBasePutData($data[$i], $primary_key);
+            $placeholder[] = '('.self::prepareArrayToIn($data[$i]).')';
+            $values = array_merge($values, array_values($data[$i]));
+        }
+
+        if (!count($data[0])) {
+            return false;
+        }
+        
+        return $this->executeQuery('INSERT INTO ('.self::prepareArrayInsert($data[0]).') 
+                VALUES '.implode(', ', $placeholder).';', $values);
+    }
+
+    function updateHelper($table_name, $primary_key, $data, $where_clause, $where_data) 
+    {
+        self::cleanBasePutData($data, $primary_key);
+
+        if (!count($data)) {
+            return false;
+        }
+
+        $res = $this->executeQuery(
+            'UPDATE '.$table_name.' SET 
+                '.self::prepareArrayToSet($data).',
+                update_timestamp = NOW(),
+                cnt_update = cnt_update + 1
+            WHERE '.$where_clause.';',
+            array_merge(array_values($data), $where_data));
+        if ($res) {
+            return $this->getAffectedRows();
+        }
         return false;
     }
 
@@ -341,13 +492,7 @@ class FW_MySQL
 
     function getLastInsertId()
     {
-        $rRes = @$this->_rMySqli->query('SELECT LAST_INSERT_ID()');
-        if ($rRes) {
-            $id = $rRes->fetch_row();
-            $rRes->free_result();
-            return $id[0];
-        }
-        return 0;
+        return $this->_rMySqli->insert_id;
     }
 
     function getNumRows($iRn = 0)

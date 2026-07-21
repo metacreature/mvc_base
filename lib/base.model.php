@@ -33,11 +33,4 @@ class Model_Base
     function __construct($db) {
         $this->_db = $db;
     }
-
-    protected function _cleanBasePutData(&$data, $primary_key) {
-        unset($data[$primary_key]);
-        unset($data['insert_timestamp']);
-        unset($data['update_timestamp']);
-        unset($data['cnt_update']);
-    }
 }
