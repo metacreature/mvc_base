@@ -34,6 +34,6 @@ class Controller_Home extends Controller_Base
     }
 
     function view() {
-        require_once (DOCUMENT_ROOT . '/views/home.view.html');
+        require_once (TEMPLATE_ROOT . '/home.view.html');
     }
 }

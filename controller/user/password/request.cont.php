@@ -47,7 +47,7 @@ class Controller_User_Password_Request extends Controller_Base
     function view() {
         $this->_logout();
         $form = $this->_getForm();
-        require_once (DOCUMENT_ROOT . '/views/user/password.request.view.html');
+        require_once (TEMPLATE_ROOT . '/user/password.request.view.html');
     }
 
     function submit() {

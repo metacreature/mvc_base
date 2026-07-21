@@ -34,7 +34,6 @@ class Controller_Base
 
     function __construct($db_credential_key) {
 
-
         // require here coz the script can be exited width _forbidden() before
         require_once (DOCUMENT_ROOT . '/lib/fw/FW_MySQL.class.php');
         require_once (DOCUMENT_ROOT . '/lib/fw/FW_Ajax_Form.class.php');
@@ -81,6 +80,11 @@ class Controller_Base
             $_SESSION['login'] = false;
         }
 
+        $this->_selectLanguage();
+        $this->_selectTemplate();
+    }
+    
+    protected function _selectLanguage() {
         // language
         $selected_lang = SETTINGS_LANG_DEFAULT;
         if (!empty($_COOKIE['selected_lang']) && in_array($_COOKIE['selected_lang'], SETTINGS_LANG_AVAILABLE)) {
@@ -98,6 +102,10 @@ class Controller_Base
 
         define('SELECTED_LANG', $selected_lang);
         require_once (DOCUMENT_ROOT . '/language/' . SELECTED_LANG . '.lang.php');
+    }
+    
+    protected function _selectTemplate() {
+        define('TEMPLATE_ROOT', DOCUMENT_ROOT . '/views');
     }
 
     protected function _forbidden($is_forbidden) {

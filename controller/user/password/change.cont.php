@@ -49,7 +49,7 @@ class Controller_User_Password_Change extends Controller_Base
         $this->_logout();
         $form = $this->_getForm();
         $form->resolveRequest();
-        require_once (DOCUMENT_ROOT . '/views/user/password.change.view.html');
+        require_once (TEMPLATE_ROOT . '/user/password.change.view.html');
     }
 
     function submit() {

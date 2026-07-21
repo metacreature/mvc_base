@@ -47,7 +47,8 @@ class Controller_User_Login extends Controller_Base
     function view() {
         $this->_logout();
         $form = $this->_getForm();
-        require_once (DOCUMENT_ROOT . '/views/user/login.view.html');
+        $login_target = !empty($_GET['target']) ? $_GET['target'] :  SETTINGS_LOGIN_TARGET;
+        require_once (TEMPLATE_ROOT . '/user/login.view.html');
     }
 
     function save() {

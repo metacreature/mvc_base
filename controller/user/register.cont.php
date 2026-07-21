@@ -48,7 +48,7 @@ class Controller_User_Register extends Controller_Base
     function view() {
         $this->_logout();
         $form = $this->_getForm();
-        require_once (DOCUMENT_ROOT . '/views/user/register.view.html');
+        require_once (TEMPLATE_ROOT . '/user/register.view.html');
     }
 
     function save() {

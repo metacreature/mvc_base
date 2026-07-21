@@ -70,6 +70,25 @@ function error_notfound() {
 // get request
 $url = str_replace('\\', '/', $_SERVER['REQUEST_URI']);
 $url = trim(preg_replace('/[\?#].*$/s', '', $url), " \t\r\n/");
+
+
+$url = explode('/', $url);
+if (SECURITY_ADMIN_URL !== 'admin') {
+	if (strtolower($url[0]) === 'admin') {
+		error_forbidden();
+		log_runtime();
+		exit;
+	} elseif ($url[0] === SECURITY_ADMIN_URL) {
+		$url[0] = 'admin';
+		if (empty($url[1])) {
+			$url[1] = 'home';
+		}
+	}
+} else if (strtolower($url[0]) === 'admin' && empty($url[1])) {
+	$url[1] = 'home';
+}
+
+$url = strtolower(implode('/', $url));
 $slashpos = strrpos($url, '/');
 
 // get controller and function
@@ -79,8 +98,13 @@ if ($url && preg_match('#^[a-z0-9_\/-]+$#', $url) && file_exists('controller/' .
 	$controller_file = 'controller/' . $url;
 	$function = 'view';
 } elseif ($controller_request && preg_match('#^[a-z0-9_\/]+$#', $controller_request) && file_exists('controller/' . $controller_request  . '.cont.php')) {
+	if ($slashpos === false) {
+		error_forbidden();
+		log_runtime();
+		exit;
+	}
 	$controller_file = 'controller/' . $controller_request;
-	$function = $slashpos === false ? '' : substr($url, $slashpos + 1);
+	$function = strtolower(substr($url, $slashpos + 1));
 } else if (!$controller_request) {
 	$controller_file = 'controller' . SETTINGS_LANDING_PAGE;
 	$function = 'view';
@@ -100,10 +124,9 @@ require_once ('lib/fw/FW_Download.class.php');
 ignore_user_abort(true);
 
 
-// choose db and replace the hidden admin path for correct class-name
-$tmp = preg_split('#[\/]#', $controller_file);
-if (preg_match('#^'.SECURITY_ADMIN_CONTROLLER_FOLDER.'$#', $tmp[1]) === 1) {
-	$tmp[1] = 'admin';
+// choose db
+$tmp = explode('/', $controller_file);
+if ($tmp[1] === 'admin') {
 	define('DB_CREDENTIAL_KEY', 'ADMIN');
 } else {
 	define('DB_CREDENTIAL_KEY', 'USER');
@@ -111,11 +134,11 @@ if (preg_match('#^'.SECURITY_ADMIN_CONTROLLER_FOLDER.'$#', $tmp[1]) === 1) {
 
 
 // execute
-$controller_name = implode('_', array_map('ucfirst', preg_split('#[\/_]#', implode('/', $tmp))));
+$controller_name = implode('_', array_map('ucfirst', preg_split('#[\/_]#', $controller_file)));
 @require_once($controller_file  . '.cont.php');
 $obj_controller = new $controller_name(DB_CREDENTIAL_KEY);
 
-if ($function && preg_match('#^[a-z0-9_]+$#', $function) && method_exists($obj_controller, $function)) {
+if (preg_match('#^[a-z0-9_]+$#', $function) && method_exists($obj_controller, $function)) {
 	ob_start();
 
 	$result = [$obj_controller, $function]();

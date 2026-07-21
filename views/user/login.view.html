@@ -24,8 +24,8 @@
  SOFTWARE.
 */
 ?>
-<?php require_once (DOCUMENT_ROOT . '/views/includes/header.view.html'); ?>
-<?php require_once (DOCUMENT_ROOT . '/views/includes/navigation.view.html'); ?>
+<?php require_once (TEMPLATE_ROOT . '/includes/header.view.html'); ?>
+<?php require_once (TEMPLATE_ROOT . '/includes/navigation.view.html'); ?>
 
 <div class="center_box_user">
     <div class="row justify-content-end">
@@ -55,10 +55,10 @@
         'default_error': LANG_FORM_DEFAULT_ERROR,
         'success': function(form, button, data) {
             if (data.success) {
-                top.location.replace("<?php outLink(!empty($_GET['target']) ? $_GET['target'] :  '/'); ?>");
+                top.location.replace("<?php outLink($login_target); ?>");
             }
         }
     });
 </script>
 
-<?php require_once (DOCUMENT_ROOT . '/views/includes/footer.view.html'); ?>
+<?php require_once (TEMPLATE_ROOT . '/includes/footer.view.html'); ?>

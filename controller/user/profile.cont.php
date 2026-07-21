@@ -69,7 +69,7 @@ class Controller_User_Profile extends Controller_Base
         $email_form = $this->_get_email_form();
         $email_form->resolveRequest($data);
         $password_form = $this->_get_password_form();
-        require_once (DOCUMENT_ROOT . '/views/user/profile.view.html');
+        require_once (TEMPLATE_ROOT . '/user/profile.view.html');
     }
 
     function update_profile() {
