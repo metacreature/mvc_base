@@ -40,7 +40,7 @@ class Controller_Base
         require_once (DOCUMENT_ROOT . '/lib/fw/FW_Date.static.php');
         require_once (DOCUMENT_ROOT . '/lib/languagelist.inc.php');
 
-        FW_Date::set_formats(SETTINGS_DATE_FORMAT_DATETIME, SETTINGS_DATE_FORMAT_DATE, SETTINGS_DATE_FORMAT_TIME);
+        FW_Date::set_formats(SETTINGS_DATEFORMAT_DATETIME, SETTINGS_DATEFORMAT_DATE, SETTINGS_DATEFORMAT_TIME);
 
         // database
         FW_MySQL::setCredentials(DB_CREDENTIALS);
