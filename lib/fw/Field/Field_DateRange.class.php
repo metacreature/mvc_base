@@ -24,34 +24,91 @@
  SOFTWARE.
 */
 
+require_once 'Field_Base.class.php';
 require_once 'Field_Date.class.php';
 
-class Field_DateRange extends Field_Date
+class Field_DateRange extends Field_Base
 {
 
     protected $_sClassName = 'fielddaterange form-control';
 
-    protected $_mValueFrom = null;
-
-    protected $_mValueTo = null;
-
     function __construct($sName)
     {
         parent::__construct($sName);
+        $this->_arrChildFields = array();
+        $this->_arrChildFields['from'] = new Field_Date($sName.'_from');
+        $this->_arrChildFields['to'] = new Field_Date($sName.'_to');
+        
         $this->setFieldErrors(array(
             'date_range' => 'invalid daterange'
         ));
-        $this->_mValue = null;
+    }
+
+    function getFieldFrom() {
+        return $this->_arrChildFields['from'];
+    }
+
+    function getFieldTo() {
+        return $this->_arrChildFields['to'];
+    }
+
+    function setFieldErrors($arrFieldErrors)
+    {
+        $this->_arrFieldErrors = array_merge($this->_arrFieldErrors, $arrFieldErrors);
+        $this->_arrChildFields['from']->setFieldErrors($arrFieldErrors);
+        $this->_arrChildFields['to']->setFieldErrors($arrFieldErrors);
+        return $this;
+    }
+
+    function setDisabled($bDisabled = true)
+    {
+        $this->_bDisabled = $bDisabled ? true : false;
+        $this->_arrChildFields['from']->setDisabled($bDisabled);
+        $this->_arrChildFields['to']->setDisabled($bDisabled);
+        return $this;
+    }
+
+    function setMandatory($bMandatory = true)
+    {
+        $this->_bMandatory = $bMandatory ? true : false;
+        $this->_arrChildFields['from']->setMandatory($bMandatory);
+        $this->_arrChildFields['to']->setMandatory($bMandatory);
+        return $this;
+    }
+
+    function isValid()
+    {
+        return $this->_bValid && $this->_arrChildFields['from']->isValid() && $this->_arrChildFields['to']->isValid();
+    }
+
+    function getError()
+    {
+        if ($this->isValid()) {
+            return null;
+        }
+        $error = array();
+        if ($this->_arrChildFields['from']->getError()) {
+            $error[$this->_arrChildFields['from']->getName()] = $this->_arrChildFields['from']->getError();
+        } else {
+            $error[$this->_arrChildFields['from']->getName()] = true;
+        }
+        if ($this->_arrChildFields['to']->getError()) {
+            $error[$this->_arrChildFields['to']->getName()] = $this->_arrChildFields['to']->getError();
+        } else {
+            $error[$this->_arrChildFields['to']->getName()] = true;
+        }
+
+        return $error;
     }
 
     function setValue($mValue)
     {
         if (! is_array($mValue) || count($mValue) != 2) {
-            $this->_mValueFrom = null;
-            $this->_mValueTo = null;
+            $this->_arrChildFields['from']->setValue(null);
+            $this->_arrChildFields['to']->setValue(null);
         } else {
-            $this->_mValueFrom = $this->_getDateObject(reset($mValue));
-            $this->_mValueTo = $this->_getDateObject(end($mValue));
+            $this->_arrChildFields['from']->setValue(!empty($mValue['from']) ? $mValue['from'] : $mValue[0]);
+            $this->_arrChildFields['to']->setValue(!empty($mValue['to']) ? $mValue['to'] : $mValue[1]);
         }
         return $this;
     }
@@ -59,78 +116,23 @@ class Field_DateRange extends Field_Date
     function getValue()
     {
         return array(
-            'from' => $this->_mValueFrom,
-            'to' => $this->_mValueTo
+            'from' => $this->_arrChildFields['from']->getValue(),
+            'to' => $this->_arrChildFields['to']->getValue()
         );
     }
 
     function resolveRequest($arrRequest)
     {
-        if (array_key_exists($this->_sName, $arrRequest)) {
-            $arrDate = $arrRequest[$this->_sName];
-            if (! is_array($arrDate) || count($arrDate) != 2) {
-                $this->_mValueFrom = null;
-                $this->_mValueTo = null;
-            } else {
-                $sDate = mb_trim($arrDate['from']);
-                $sDate = ini_get('magic_quotes_gpc') ? stripslashes($sDate) : $sDate;
-                $this->_mValueFrom = $this->_resolveValue($sDate);
-
-                $sDate = mb_trim($arrDate['to']);
-                $sDate = ini_get('magic_quotes_gpc') ? stripslashes($sDate) : $sDate;
-                $this->_mValueTo = $this->_resolveValue($sDate);
-            }
-        }
-    }
-
-    protected function _validateMandatory()
-    {
-        if ($this->_bMandatory && (! $this->_mValueFrom || ! $this->_mValueTo)) {
-            $this->setErrorCode('mandatory');
-            return false;
-        }
-        return true;
-    }
-
-    protected function _validateRegEx()
-    {
-        if (($this->_mValueFrom && ! ($this->_mValueFrom instanceof DateTime)) || ($this->_mValueTo && ! ($this->_mValueTo instanceof DateTime))) {
-            $this->setErrorCode('date_invalid');
-            return false;
-        }
-        return true;
+        $this->_arrChildFields['from']->resolveRequest($arrRequest);
+        $this->_arrChildFields['to']->resolveRequest($arrRequest);
     }
 
     protected function _validateRange()
     {
-        if ($this->_mValueFrom && $this->_mValueTo && $this->_mValueFrom > $this->_mValueTo) {
-            $this->setErrorCode('date_range');
-            return false;
-        }
-        return true;
-    }
-
-    protected function _validateMinDate()
-    {
-        if ($this->_oMinDate && (($this->_mValueFrom && $this->_mValueFrom < $this->_oMinDate) || ($this->_mValueTo && $this->_mValueTo < $this->_oMinDate))) {
+        $value = $this->getValue();
+        if ($value['from'] && $value['to'] && $value['from'] > $value['to']) {
+            $this->_arrChildFields['from']->setErrorCode('date_range');
             $this->_bValid = false;
-            $this->_sErrorCode = 'date_min';
-            if (! $this->_sError) {
-                $this->_sError = str_replace('{MIN_DATE}', $this->_oMinDate->format(self::$sInternalFormat), $this->_arrFieldErrors['date_min']);
-            }
-            return false;
-        }
-        return true;
-    }
-
-    protected function _validateMaxDate()
-    {
-        if ($this->_oMaxDate && (($this->_mValueFrom && $this->_mValueFrom > $this->_oMaxDate) || ($this->_mValueTo && $this->_mValueTo > $this->_oMaxDate))) {
-            $this->_bValid = false;
-            $this->_sErrorCode = 'date_max';
-            if (! $this->_sError) {
-                $this->_sError = str_replace('{MAX_DATE}', $this->_oMaxDate->format(self::$sInternalFormat), $this->_arrFieldErrors['date_max']);
-            }
             return false;
         }
         return true;
@@ -138,58 +140,20 @@ class Field_DateRange extends Field_Date
 
     function validate()
     {
-        $this->_bValid = true;
-        if (! $this->_validateMandatory())
-            return false;
-        if (! $this->_validateRegEx())
-            return false;
-        if (! $this->_validateConfig())
+        $this->_bValid = $this->_arrChildFields['from']->validate() && $this->_arrChildFields['to']->validate();
+        if (!$this->_bValid)
             return false;
         if (! $this->_validateRange())
-            return false;
-        if (! $this->_validateMinDate())
-            return false;
-        if (! $this->_validateMaxDate())
             return false;
         return $this->_checkError();
     }
 
     function returnInput($arrAttributes = null, $bFormDisabled = false)
     {
-        $arrAttributesFrom = $this->_getAttributes($arrAttributes, $bFormDisabled);
-        $arrAttributesFrom['name'] .= '[from]';
-        $arrAttributesFrom['id'] .= '_from';
-        if ($this->_mValueFrom instanceof DateTime) {
-            $arrAttributesFrom['value'] = $this->_mValueFrom->format(self::$sInternalFormat);
-        } else {
-            $arrAttributesFrom['value'] = $this->_mValueFrom;
-        }
-
-        $arrAttributesTo = $this->_getAttributes($arrAttributes, $bFormDisabled);
-        $arrAttributesTo['name'] .= '[to]';
-        $arrAttributesTo['id'] .= '_to';
-        if ($this->_mValueTo instanceof DateTime) {
-            $arrAttributesTo['value'] = $this->_mValueTo->format(self::$sInternalFormat);
-        } else {
-            $arrAttributesTo['value'] = $this->_mValueTo;
-        }
-
-        $ret = '<input' . $this->_buildAttributesString($arrAttributesFrom) . '>
-					<span class="input-group-addon daterange-middle">&#8211;</span>
-					<input' . $this->_buildAttributesString($arrAttributesTo) . '>';
-        
-        $ret .= '<script>
-    		$("#'.$arrAttributesFrom['id'].', #'.$arrAttributesTo['id'].'").datepicker({
-    			format: "' . $this->getExternalFormat() . '",
-    			' . ($this->getMinDate() ? 'startDate: "' . $this->getMinDate()->format($this->getInternalFormat()) . '",' : '') . '
-    			' . ($this->getMaxDate() ? 'endDate: "' . $this->getMaxDate()->format($this->getInternalFormat()) . '",' : '') . '
-    			clearBtn: true,
-    			autoclose: true,
-    			maxViewMode: 2,
-    			language: "de"
-    		});
-    		</script>';
-        
-        return $ret;
+        return '<div class="input-group">'.
+                $this->_arrChildFields['from']->returnInput($arrAttributes, $bFormDisabled).
+		        '<div class="input-group-text">&#8211;</div>'.
+                $this->_arrChildFields['to']->returnInput($arrAttributes, $bFormDisabled).
+                '</div>';
     }
 }

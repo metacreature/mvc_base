@@ -83,17 +83,15 @@ class Field_Number extends Field_Text
         }
         if (!is_null($this->_fMinValue) && $this->_fMinValue > (int) $this->_mValue) {
             $this->_bValid = false;
-            $this->_sErrorCode = 'min_number';
-            if (! $this->_sError) {
-                $this->_sError = str_replace('{VALUE}', $this->_fMinValue, $this->_arrFieldErrors['min_number']);
+            if (! $this->_mError) {
+                $this->_mError = str_replace('{VALUE}', $this->_fMinValue, $this->_arrFieldErrors['min_number']);
             }
             return false;
         }
         if (!is_null($this->_fMaxValue) && $this->_fMaxValue < (int) $this->_mValue) {
             $this->_bValid = false;
-            $this->_sErrorCode = 'max_number';
-            if (! $this->_sError) {
-                $this->_sError = str_replace('{VALUE}', $this->_fMaxValue, $this->_arrFieldErrors['max_number']);
+            if (! $this->_mError) {
+                $this->_mError = str_replace('{VALUE}', $this->_fMaxValue, $this->_arrFieldErrors['max_number']);
             }
             return false;
         }

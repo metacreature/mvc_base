@@ -15,13 +15,23 @@ define('LANG_NAVIGATION_LAYOUT_LIGHT', 'hell');
 define('LANG_NAVIGATION_LAYOUT_AUTO', 'auto');
 
 define('LANG_FORMFIELD_ERRORS', array(
+    'mandatory' => 'Eingabe erforderlich!',
+    'mandatory_select' => 'Auswahl erforderlich!',
+    'mandatory_checkbox' => 'Auswahl erforderlich!',
     'pattern' => 'Eingabe ungültig!',
     'external' => 'Eingabe ungültig!',
     'too_long' => 'Eingabe zu lang! (max {LENGTH}, aktuell {ACTUAL_LENGTH})',
     'too_short' => 'Eingabe zu kurz! (min {LENGTH}, aktuell {ACTUAL_LENGTH})',
     'min_number' => 'Wert darf nicht kleiner als {VALUE} sein!',
     'max_number' => 'Wert darf nicht größer als {VALUE} sein!',
-    'mandatory' => 'Eingabe erforderlich!'
+    'date_min' => 'Das Mindest-Datum ist {MIN_DATE}!',
+    'date_max' => 'Das maximale Datum ist {MAX_DATE}!',
+    'date_invalid' => 'Ungültiges Datum!',
+    'date_config' => 'Fehlerhafte Konfiguration!',
+    'date_range' => 'Ungültiger Datumsbereich!',
+    'file_type' => 'Falscher Dateityp! (erlaubt: {FILETYPES})',
+    'file_size' => 'Die Datei ist zu groß! (maximal: {FILESIZE})',
+    'file_upload' => 'PHP-Fehler "{ERROR}" während des Uploads!'
 ));
 define('LANG_FORM_INVALID', 'Bitte überprüfen Sie ihre Eingabe!');
 define('LANG_FORM_DEFAULT_ERROR', 'Es ist ein Fehler aufgetreten! Bitte versuche es später noch einmal!');

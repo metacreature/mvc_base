@@ -35,14 +35,14 @@ class Field_Checkbox extends Field_Base
     {
         parent::__construct($sName);
         $this->setFieldErrors(array(
-            'mandatory' => 'checkbox required'
+            'mandatory_checkbox' => 'checkbox required'
         ));
-        $this->setValue('0');
+        $this->setValue(0);
     }
 
     function setValue($sValue)
     {
-        $this->_mValue = empty($sValue) ? '0' : '1';
+        $this->_mValue = empty($sValue) ? 0 : 1;
 
         return $this;
     }
@@ -50,14 +50,14 @@ class Field_Checkbox extends Field_Base
     function resolveRequest($arrRequest)
     {
         if (array_key_exists('_available_' . $this->_sName, $arrRequest)) {
-            $this->setValue(! empty($arrRequest[$this->_sName]) ? 1 : 0);
+            $this->setValue($arrRequest[$this->_sName]);
         }
     }
 
     protected function _validateMandatory()
     {
         if ($this->_bMandatory && ! $this->_mValue) {
-            $this->setErrorCode('mandatory');
+            $this->setErrorCode('mandatory_checkbox');
             return false;
         }
         return true;
@@ -79,7 +79,7 @@ class Field_Checkbox extends Field_Base
         $_arrAttributes = parent::_getAttributes($arrAttributes, $bFormDisabled);
 
         $_arrAttributes['type'] = 'checkbox';
-        $_arrAttributes['value'] = '1';
+        $_arrAttributes['value'] = 1;
         if ($this->_mValue) {
             $_arrAttributes['checked'] = '';
         }

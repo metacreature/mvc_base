@@ -148,6 +148,25 @@ class FW_Ajax_Form
         return null;
     }
 
+    function getValuesFlat($bIncludeHelper = false)
+    {
+        $arrResult = array();
+        foreach ($this->_arrFormFields as $sFieldName => $oField) {
+            if (!$oField->getDisabled() && ($bIncludeHelper || ! $oField->getHelper())) {
+                if ($oField->getChildFields()) {
+                    foreach ($oField->getChildFields() as $oChild) {
+                        if (!$oChild->getDisabled() && ($bIncludeHelper || ! $oChild->getHelper())) {
+                            $arrResult[$oChild->getName()] = $oChild->getValue();
+                        }
+                    }
+                } else {
+                    $arrResult[$sFieldName] = $oField->getValue();
+                }
+            }
+        }
+        return $arrResult;
+    }
+
     function resolveRequest(&$arrDBData = null)
     {
         if (is_array($arrDBData)) {
@@ -218,7 +237,12 @@ class FW_Ajax_Form
         $arrFieldErrors = array();
         foreach ($this->_arrFormFields as $sFieldName => $oField) {
             if ($oField->getError()) {
-                $arrFieldErrors[$sFieldName] = $oField->getError();
+                $error = $oField->getError();
+                if (is_array($error)) {
+                    $arrFieldErrors = array_merge($arrFieldErrors, $error);
+                } else {
+                    $arrFieldErrors[$sFieldName] = $error;
+                }
             }
         }
         return array_merge(array('error' => true, 'field_errors' => $arrFieldErrors, 'message' => $sMessage), $arr);

@@ -44,9 +44,7 @@ abstract class Field_Base
 
     protected $_bValid = true;
 
-    protected $_sError = '';
-
-    protected $_sErrorCode = '';
+    protected $_mError = null;
 
     protected $_sRegEx = '';
 
@@ -54,7 +52,7 @@ abstract class Field_Base
 
     protected $_iMaxLength = null;
 
-    protected $_arrParams = array();
+    protected $_arrChildFields = null;
 
     protected $_arrFieldErrors = array(
         'mandatory' => 'input is required',
@@ -73,6 +71,10 @@ abstract class Field_Base
     {
         $sType = explode('_', get_class($this));
         return $sType[1];
+    }
+
+    function getChildFields() {
+        return $this->_arrChildFields;
     }
 
     function setFieldErrors($arrFieldErrors)
@@ -122,20 +124,6 @@ abstract class Field_Base
     function setMandatory($bMandatory = true)
     {
         $this->_bMandatory = $bMandatory ? true : false;
-        return $this;
-    }
-
-    function getParam($sParam)
-    {
-        if (! array_key_exists($sParam, $this->_arrParams)) {
-            return null;
-        }
-        return $this->_arrParams[$sParam];
-    }
-
-    function setParam($sParam, $mValue)
-    {
-        $this->_arrParams[$sParam] = $mValue;
         return $this;
     }
 
@@ -208,20 +196,14 @@ abstract class Field_Base
 
     function getError()
     {
-        return $this->_sError;
-    }
-
-    function getErrorCode()
-    {
-        return $this->_sErrorCode;
+        return $this->_mError;
     }
 
     function setErrorCode($sErrorCode)
     {
-        if (!$this->_sError) {
-            $this->_sErrorCode = $sErrorCode;
+        if (!$this->_mError) {
             $this->_bValid = false;
-            $this->_sError = ! empty($this->_arrFieldErrors[$sErrorCode]) ? $this->_arrFieldErrors[$sErrorCode] : $this->_arrFieldErrors['unknown'];
+            $this->_mError = ! empty($this->_arrFieldErrors[$sErrorCode]) ? $this->_arrFieldErrors[$sErrorCode] : $this->_arrFieldErrors['unknown'];
         }
     }
 
@@ -312,9 +294,8 @@ abstract class Field_Base
         }
         if ($this->_iMinLength && $this->_iMinLength > mb_strlen($this->_mValue)) {
             $this->_bValid = false;
-            $this->_sErrorCode = 'too_short';
-            if (! $this->_sError) {
-                $this->_sError = str_replace(array(
+            if (! $this->_mError) {
+                $this->_mError = str_replace(array(
                     '{LENGTH}',
                     '{ACTUAL_LENGTH}'
                 ), array(
@@ -326,9 +307,8 @@ abstract class Field_Base
         }
         if ($this->_iMaxLength && $this->_iMaxLength < mb_strlen($this->_mValue)) {
             $this->_bValid = false;
-            $this->_sErrorCode = 'too_long';
-            if (! $this->_sError) {
-                $this->_sError = str_replace(array(
+            if (! $this->_mError) {
+                $this->_mError = str_replace(array(
                     '{LENGTH}',
                     '{ACTUAL_LENGTH}'
                 ), array(
@@ -343,7 +323,7 @@ abstract class Field_Base
 
     protected function _checkError()
     {
-        if ($this->_sError || $this->_sErrorCode) {
+        if ($this->_mError) {
             $this->_bValid = false;
         }
         return $this->_bValid;
@@ -351,9 +331,9 @@ abstract class Field_Base
 
     abstract function validate();
 
-    abstract function returnInput($arrAttributes, $bFormDisabled);
+    abstract function returnInput($arrAttributes = null, $bFormDisabled = false);
 
-    function outInput($arrAttributes, $bFormDisabled) {
+    function outInput($arrAttributes = null, $bFormDisabled = false) {
     	echo $this->returnInput($arrAttributes, $bFormDisabled);
     }
 }

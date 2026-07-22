@@ -39,7 +39,7 @@ class Field_Select extends Field_Base
     {
         parent::__construct($sName);
         $this->setFieldErrors(array(
-            'mandatory' => 'select required'
+            'mandatory_select' => 'select required'
         ));
     }
 
@@ -103,7 +103,7 @@ class Field_Select extends Field_Base
     protected function _validateMandatory()
     {
         if ($this->_bMandatory && ($this->_mValue === '' || (is_array($this->_mValue) && count($this->_mValue) == 0))) {
-            $this->setErrorCode('mandatory');
+            $this->setErrorCode('mandatory_select');
             return false;
         }
         return true;

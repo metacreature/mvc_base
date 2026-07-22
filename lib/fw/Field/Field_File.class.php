@@ -179,9 +179,8 @@ class Field_File extends Field_Base
             foreach ($this->_mValue as $arrUploadedFile) {
                 if ($arrUploadedFile['error']) {
                     $this->_bValid = false;
-                    $this->_sErrorCode = 'file_upload';
-                    if (! $this->_sError) {
-                        $this->_sError = str_replace('{ERROR}', $arrUploadedFile['error'], $this->_arrFieldErrors['file_upload']);
+                    if (! $this->_mError) {
+                        $this->_mError = str_replace('{ERROR}', $arrUploadedFile['error'], $this->_arrFieldErrors['file_upload']);
                     }
                     return false;
                 }
@@ -203,9 +202,8 @@ class Field_File extends Field_Base
                 }
                 if (! $bFound) {
                     $this->_bValid = false;
-                    $this->_sErrorCode = 'file_type';
-                    if (! $this->_sError) {
-                        $this->_sError = str_replace('{FILETYPES}', '*.' . implode(', *.', $this->_arrExtensions), $this->_arrFieldErrors['file_type']);
+                    if (! $this->_mError) {
+                        $this->_mError = str_replace('{FILETYPES}', '*.' . implode(', *.', $this->_arrExtensions), $this->_arrFieldErrors['file_type']);
                     }
                     return false;
                 }
@@ -220,9 +218,8 @@ class Field_File extends Field_Base
             foreach ($this->_mValue as $arrUploadedFile) {
                 if ($arrUploadedFile['size'] > $this->_iMaxSize) {
                     $this->_bValid = false;
-                    $this->_sErrorCode = 'file_size';
-                    if (! $this->_sError) {
-                        $this->_sError = str_replace('{FILESIZE}', self::_human_filesize($this->_iMaxSize), $this->_arrFieldErrors['file_size']);
+                    if (! $this->_mError) {
+                        $this->_mError = str_replace('{FILESIZE}', self::_human_filesize($this->_iMaxSize), $this->_arrFieldErrors['file_size']);
                     }
                     return false;
                 }
