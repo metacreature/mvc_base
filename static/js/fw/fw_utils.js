@@ -270,3 +270,34 @@ async function copyTextToClipboard(text) {
 	console.error('Fallback: Could not copy text to clipboard');
 	return false;
 }
+
+function scrollVisible(ele, extra_margin) {
+	extra_margin = extra_margin || 20;
+	var scroll_top = document.querySelector("html").scrollTop;
+	var body_style = window.getComputedStyle(document.querySelector("body"));
+	var body_top = parseInt(body_style.getPropertyValue('padding-top').replace('px', ''));
+	var body_bottom = parseInt(body_style.getPropertyValue('padding-bottom').replace('px', ''));
+
+	var response_rect = ele.getBoundingClientRect();
+	var max_top = response_rect.top + scroll_top - (body_top + extra_margin);
+	var min_bottom = response_rect.top + scroll_top + (response_rect.bottom - response_rect.top) - window.innerHeight + (body_bottom + extra_margin);
+
+	if (scroll_top > max_top) {
+		window.scrollTo({
+			top: max_top,
+			behavior: "smooth",
+		});
+	}else if (scroll_top < min_bottom) {
+		if (max_top > min_bottom) {
+			window.scrollTo({
+				top: min_bottom,
+				behavior: "smooth",
+			});
+		} else {
+			window.scrollTo({
+				top: max_top,
+				behavior: "smooth",
+			});
+		}
+	}
+}

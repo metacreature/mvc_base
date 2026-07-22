@@ -25,61 +25,6 @@
 
 */
 
-$.fn.tinymce = function(options) {
-	return this.each(function() {
-		var settings = $.extend(true, {}, $.fn.tinymce.defaults, options);
-		
-		var form = $(this).closest('form');
-		var button = settings.submit_btn ? $(settings.submit_btn) : form.find('.btn-ajax-submit').first();
-	
-		$(this).addClass('is_tinymce');
-		
-		var pressSave = function (event) {
-			if (event.which == 83 && event.ctrlKey) {
-				var target = $(event.target);
-				if (target.hasClass('mce-content-body')) {
-					button.click();
-				}
-				event.preventDefault();
-				return false;
-			}
-			return true;
-		}
-		
-		tinymce.init({
-			target: $(this)[0],
-			menubar: false,
-			height: settings.height,
-			plugins : 'link image code fullscreen',
-			toolbar: 'code fullscreen | undo redo | removeformat | bold italic underline | alignleft aligncenter, alignright, alignjustify | bullist numlist link image',
-			link_class_list: [
-				{title: 'External Textlink', value: 'text_link external_link'},
-			    {title: 'External Button', value: 'button_link external_link'},
-			    {title: 'External', value: 'external_link'},
-			    {title: 'Internal Textlink', value: 'text_link internal_link'},
-			    {title: 'Internal Button', value: 'button_link internal_link'},
-			    {title: 'Internal', value: 'internal_link'},
-			  ],
-		 	target_list: [
-		    	{ text: 'New window', value: '_blank' },
-		 		{ text: 'Current window', value: ''},
-		  	],
-		  	default_link_target: '_blank',
-		  	link_title: false,
-		  	convert_urls : false,
-			content_css: '/static/css/bundle.min.css,' + ADMIN_WEB_ROOT +'/static/css/tinymce_content.css',
-		}).then(function(editor){
-			$('iframe').contents().keydown(pressSave);
-			$('iframe').contents().keypress(pressSave);
-		});
-	});
-}
-
-$.fn.tinymce.defaults = {
-	submit_btn: null,
-	height: 300,
-}
-
 $.fn.ajax_form = function(options) {
 	return this.each(function() {
 		var settings = $.extend(true, {}, $.fn.ajax_form.defaults, options);
@@ -108,6 +53,7 @@ $.fn.ajax_form = function(options) {
 			var key = form.data('name')+'__'+document.location.href;
 			if (typeof form_messages[key] != 'undefined') {
 				form.find(".ajax-form-response").html('<span class="ajax-form-success">'+form_messages[key]+'</span>').show();
+				scrollVisible(form.find(".ajax-form-response")[0], settings.scroll_message_margin);
 			}
 		}
 	});
@@ -142,13 +88,6 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 	form.find('.line-error').removeClass('line-error');
 	form.find('.field-error').removeClass('field-error');
 	
-	var ajax_form_scrolltop = function() {
-		var top = form.find(".ajax-form-response").offset().top - 90;
-		if ($(document).scrollTop() > top) {
-			$(document).scrollTop(top);
-		};
-	}
-	
 	if (typeof data !== 'object' || is_empty(data)) {
 		if (settings.error) {
 			settings.error(form, button, null);
@@ -158,7 +97,9 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 			error_message = settings.default_error;
 		}
 		
-		IconCaptcha.reset();
+		try{
+			IconCaptcha.reset();
+		} catch(e) {}
 
 		form.find(".field-error").remove();
 		form.find(".field-line").removeClass('line-error');
@@ -167,7 +108,9 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 		
 	} else {
 		if (data.captcha_reset) {
-			IconCaptcha.reset();
+			try{
+				IconCaptcha.reset();
+			} catch(e) {}
 		}
 		if (data.success && data.redirect_url) {
 			if(data.message) {
@@ -183,7 +126,7 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 			}
 			if(data.message) {
 				form.find(".ajax-form-response").html('<div class="ajax-form-success alert alert-success">'+data.message+'</div>').show();
-				ajax_form_scrolltop();
+				scrollVisible(form.find(".ajax-form-response")[0], settings.scroll_message_margin);
 			}
 			form.find(".ajax-form-success-hide").hide();
 		} else if (data.warning) {
@@ -192,7 +135,7 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 			}
 			if(data.message) {
 				form.find(".ajax-form-response").html('<div class="ajax-form-warning alert alert-warning">'+data.message+'</div>').show();
-				ajax_form_scrolltop();
+				scrollVisible(form.find(".ajax-form-response")[0], settings.scroll_message_margin);
 			}
 			form.find(".ajax-form-warning-hide").hide();
 		} else {
@@ -218,13 +161,11 @@ $.fn.ajax_form.ajax_form_complete = function(form, button, options, data, status
 					}
 				}
 				field = form.find('.line-error [name]');
-				field.first().focus();
+				//field.first().focus();
 			}
 			if (data.message) {
 				form.find(".ajax-form-response").html('<div class="ajax-form-error alert alert-danger">'+data.message+'</div>').show();
-				if (!field || field.length == 0) {
-					ajax_form_scrolltop();
-				}
+				scrollVisible(form.find(".ajax-form-response")[0], settings.scroll_message_margin);
 			}
 		}
 	}
@@ -297,7 +238,7 @@ $.fn.ajax_form.submit_form = function(form, button, options) {
 		var data = $.fn.ajax_form.fullSerializeFormArray(form);
 		
 		button.addClass("btn-loading");
-		button.blur();
+		//button.blur();
 		
 		$.ajax({
 			type: "POST",
@@ -316,6 +257,7 @@ $.fn.ajax_form.submit_form = function(form, button, options) {
 $.fn.ajax_form.defaults = {
 	default_error: null,
 	submit_btn: null,
+	scroll_message_margin: null,
 	beforesubmit: null,
 	success: null,
 	warning: null,

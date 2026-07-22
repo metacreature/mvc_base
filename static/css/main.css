@@ -231,7 +231,7 @@ form.ajax-form .form-group:last-child{
 .ajax-form-response .ajax-form-error,
 .ajax-form-response .ajax-form-success, 
 .ajax-form-response .ajax-form-warning{
-	animation: hide_msg 1s linear 3s;
+	animation: hide_msg 1s linear 5s;
 	animation-fill-mode: forwards;
 }
 input.form-check-input{
