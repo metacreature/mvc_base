@@ -44,6 +44,30 @@ class Field_DateRange extends Field_Base
         ));
     }
 
+    function getMinValue()
+    {
+        return $this->_arrChildFields['from']->getMinValue();
+    }
+
+    function getMaxValue()
+    {
+        return $this->_arrChildFields['to']->getMaxValue();
+    }
+
+    function setMinValue($mMinValue)
+    {
+        $this->_arrChildFields['from']->setMinValue($mMinValue);
+        $this->_arrChildFields['to']->setMinValue($mMinValue);
+        return $this;
+    }
+
+    function setMaxValue($mMaxValue)
+    {
+        $this->_arrChildFields['from']->setMaxValue($mMaxValue);
+        $this->_arrChildFields['to']->setMaxValue($mMaxValue);
+        return $this;
+    }
+
     function getFieldFrom() {
         return $this->_arrChildFields['from'];
     }

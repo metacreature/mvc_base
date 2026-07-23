@@ -8,30 +8,59 @@ class FW_Date{
     const FORMAT_DATE = 'd';
     const FORMAT_TIME = 't';
 
-	protected static $mysql_formats = array(
+	protected static $_mysql_formats = array(
         'dt' => 'Y-m-d H:i:s',
         'd' => 'Y-m-d',
         't' => 'H:i:s'
     );
 
-    protected static $php_formats = null;
+    protected static $_user_formats = null;
 
-	static function set_formats($date_time, $date, $time) 
+    protected static $_mapping = array(
+        'd'=>'DD',
+        'j'=>'D',
+        'm'=>'MM',
+        'n'=>'M',
+        'M'=>'Mon',
+        'F'=>'Month',
+        'Y'=>'YYYY',
+        'y'=>'YY',
+        'g'=>'H',
+        'G'=>'H',
+        'h'=>'H',
+        'H'=>'HH',
+        'i'=>'MM',
+        's'=>'SS',
+        'a'=>'am/pm',
+        'A'=>'AM/PM'
+    );
+
+    protected static function _test_init() {
+        if (!is_array( self::$_user_formats)) {
+            throw new Exception('FW_Date: PHP  date-formats not set!');
+        }
+    }
+
+	static function set_user_formats($date_time, $date, $time) 
     {
-        self::$php_formats = array(
+        self::$_user_formats = array(
             'dt' => $date_time,
             'd' => $date,
             't' => $time
         );
     }
 
-    private static function _test_init() {
-        if (!is_array( self::$php_formats)) {
-            throw new Exception('FW_Date: PHP  date-formats not set!');
-        }
+    static function get_user_format($format) 
+    {
+        return self::$_user_formats[$format];
     }
 
-	static function mysql_to_php($date_string, $format, $format_to = null) 
+    static function get_display_format($format) 
+    {
+        return strtr(self::$_user_formats[$format], self::$_mapping);
+    }
+
+	static function mysql_to_user($date_string, $format, $format_to = null) 
 	{
         self::_test_init();
 
@@ -44,11 +73,11 @@ class FW_Date{
 		
         $date_object = self::mysql_to_obj($date_string, $format);
         if ($date_object) {
-		    return $date_object->format(self::$php_formats[$format_to]);
+		    return $date_object->format(self::$_user_formats[$format_to]);
         }
 	}
 
-	static function php_to_mysql($date_string, $format, $format_to = null) 
+	static function user_to_mysql($date_string, $format, $format_to = null) 
 	{
         self::_test_init();
 
@@ -59,41 +88,37 @@ class FW_Date{
             return null;
         }
 		
-        $date_object = self::php_to_obj($date_string, $format);
+        $date_object = self::user_to_obj($date_string, $format);
         if ($date_object) {
-            return $date_object->format(self::$mysql_formats[$format_to]);
+            return $date_object->format(self::$_mysql_formats[$format_to]);
         }
 	}
 
 	static function obj_to_mysql($date_object, $format)
     {
-        self::_test_init();
-
         if ($date_object instanceof DateTime) {
-            return $date_object->format(self::$mysql_formats[$format]);
+            return $date_object->format(self::$_mysql_formats[$format]);
         }
         return null;
     }
 
-	static function obj_to_php($date_object, $format)
+	static function obj_to_user($date_object, $format)
     {
         self::_test_init();
 
         if ($date_object instanceof DateTime) {
-            return $date_object->format(self::$php_formats[$format]);
+            return $date_object->format(self::$_user_formats[$format]);
         }
         return null;
     }
 
     static function mysql_to_obj($date_string, $format)
     {
-        self::_test_init();
-
         if (!is_string($date_string)) {
             return null;
         }
 
-        $date_object = DateTime::createFromFormat(self::$mysql_formats[$format], $date_string);
+        $date_object = DateTime::createFromFormat(self::$_mysql_formats[$format], $date_string);
         if ($date_object === false) {
             return null;
         }
@@ -104,14 +129,16 @@ class FW_Date{
                 break;
             case self::FORMAT_TIME:
                 $date_object->setDate(1900, 1, 1);
-                break;
             default:
+                if (strpos(self::$_user_formats[$format], 's') === false) {
+                    $date_object->setTime($date_object->format('h'), $date_object->format('i'), 0);
+                }
                 break;
         }
         return $date_object;
     }
 
-    static function php_to_obj($date_string, $format)
+    static function user_to_obj($date_string, $format)
     {
         self::_test_init();
 
@@ -119,7 +146,7 @@ class FW_Date{
             return null;
         }
         
-        $date_object = DateTime::createFromFormat(self::$php_formats[$format], $date_string);
+        $date_object = DateTime::createFromFormat(self::$_user_formats[$format], $date_string);
         if ($date_object === false) {
             return null;
         }
@@ -130,8 +157,10 @@ class FW_Date{
                 break;
             case self::FORMAT_TIME:
                 $date_object->setDate(1900, 1, 1);
-                break;
             default:
+                if (strpos(self::$_user_formats[$format], 's') === false) {
+                    $date_object->setTime($date_object->format('h'), $date_object->format('i'), 0);
+                }
                 break;
         }
         return $date_object;

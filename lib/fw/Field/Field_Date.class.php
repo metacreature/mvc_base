@@ -34,56 +34,61 @@ class Field_Date extends Field_Base
 
     protected $_sValue;
 
-    protected $_oMinDate = null;
+    protected $_oMinValue = null;
 
-    protected $_oMaxDate = null;
+    protected $_oMaxValue = null;
+
+
+    protected $_sFormatKey = 'd';
+    protected $_sErrorKeyMin = 'date_min';
+    protected $_sErrorKeyMax = 'date_max';
+    protected $_sErrorKeyInvalid = 'date_invalid';
 
     function __construct($sName)
     {
         parent::__construct($sName);
         $this->setFieldErrors(array(
-            'date_min' => 'Minimum Date is {MIN_DATE}',
-            'date_max' => 'Maximum Date is {MAX_DATE}',
-            'date_invalid' => 'invalid date',
+            'date_min' => 'Minimum Date is {MIN}',
+            'date_max' => 'Maximum Date is {MAX}',
+            'date_invalid' => 'required format is {FORMAT}',
             'date_config' => 'invalid config'
         ));
     }
-
-    function getMinDate()
-    {
-        return $this->_oMinDate;
-    }
-
-    function getMaxDate()
-    {
-        return $this->_oMaxDate;
-    }
-
+    
     protected function _getDateObject($mDate)
     {
-        if ($mDate instanceof DateTime) {
-            return $mDate->setTime(0, 0, 0);
-        } else if (is_int($mDate)) {
+        $oDate = null;
+        if (is_int($mDate)) {
             $oDate = new DateTime();
-            return $oDate->setTimestamp($mDate)->setTime(0, 0, 0);
+            $oDate->setTimestamp($mDate);
         } else if (is_string($mDate) && mb_trim($mDate)) {
-            $mDate = FW_Date::php_to_obj(mb_trim($mDate), 'd');
-            if ($mDate) {
-                return $mDate->setTime(0, 0, 0);
-            }
+            $oDate = FW_Date::user_to_obj(mb_trim($mDate), $this->_sFormatKey);
+        }
+        if ($oDate instanceof DateTime) {
+            return $oDate->setTime(0, 0, 0);
         }
         return null;
     }
 
-    function setMinDate($mMinDate)
+    function getMinValue()
     {
-        $this->_oMinDate = $this->_getDateObject($mMinDate);
+        return $this->_oMinValue;
+    }
+
+    function getMaxValue()
+    {
+        return $this->_oMaxValue;
+    }
+
+    function setMinValue($mMinValue)
+    {
+        $this->_oMinValue = $this->_getDateObject($mMinValue);
         return $this;
     }
 
-    function setMaxDate($mMaxDate)
+    function setMaxValue($mMaxValue)
     {
-        $this->_oMaxDate = $this->_getDateObject($mMaxDate);
+        $this->_oMaxValue = $this->_getDateObject($mMaxValue);
         return $this;
     }
 
@@ -93,7 +98,7 @@ class Field_Date extends Field_Base
         if (is_string($mValue)) {
             $this->_sValue = $mValue;
         } else if ($this->_mValue) {
-            $this->_sValue = FW_Date::obj_to_php($this->_mValue, 'd');
+            $this->_sValue = FW_Date::obj_to_user($this->_mValue, $this->_sFormatKey);
         } else {
             $this->_sValue = null;
         }
@@ -121,7 +126,10 @@ class Field_Date extends Field_Base
     protected function _validateRegEx()
     {
         if ($this->_sValue && ! ($this->_mValue instanceof DateTime)) {
-            $this->setErrorCode('date_invalid');
+            $this->_bValid = false;
+            if (! $this->_mError) {
+                $this->_mError = str_replace('{FORMAT}', FW_Date::get_display_format($this->_sFormatKey), $this->_arrFieldErrors[$this->_sErrorKeyInvalid]);
+            }
             return false;
         }
         return true;
@@ -129,31 +137,31 @@ class Field_Date extends Field_Base
 
     protected function _validateConfig()
     {
-        if ($this->_oMinDate && $this->_oMaxDate && $this->_oMinDate > $this->_oMaxDate) {
+        if ($this->_oMinValue && $this->_oMaxValue && $this->_oMinValue > $this->_oMaxValue) {
             $this->setErrorCode('date_config');
             return false;
         }
         return true;
     }
 
-    protected function _validateMinDate()
+    protected function _validateMinValue()
     {
-        if ($this->_oMinDate && $this->_mValue && $this->_mValue < $this->_oMinDate) {
+        if ($this->_oMinValue && $this->_mValue && $this->_mValue < $this->_oMinValue) {
             $this->_bValid = false;
             if (! $this->_mError) {
-                $this->_mError = str_replace('{MIN_DATE}', FW_Date::obj_to_php($this->_oMinDate, 'd'), $this->_arrFieldErrors['date_min']);
+                $this->_mError = str_replace('{MIN}', FW_Date::obj_to_user($this->_oMinValue, $this->_sFormatKey), $this->_arrFieldErrors[$this->_sErrorKeyMin]);
             }
             return false;
         }
         return true;
     }
 
-    protected function _validateMaxDate()
+    protected function _validateMaxValue()
     {
-        if ($this->_oMaxDate && $this->_mValue && $this->_mValue > $this->_oMaxDate) {
+        if ($this->_oMaxValue && $this->_mValue && $this->_mValue > $this->_oMaxValue) {
             $this->_bValid = false;
             if (! $this->_mError) {
-                $this->_mError = str_replace('{MAX_DATE}', FW_Date::obj_to_php($this->_oMaxDate, 'd'), $this->_arrFieldErrors['date_max']);
+                $this->_mError = str_replace('{MAX}', FW_Date::obj_to_user($this->_oMaxValue, $this->_sFormatKey), $this->_arrFieldErrors[$this->_sErrorKeyMax]);
             }
             return false;
         }
@@ -169,9 +177,9 @@ class Field_Date extends Field_Base
             return false;
         if (! $this->_validateConfig())
             return false;
-        if (! $this->_validateMinDate())
+        if (! $this->_validateMinValue())
             return false;
-        if (! $this->_validateMaxDate())
+        if (! $this->_validateMaxValue())
             return false;
         return $this->_checkError();
     }
@@ -183,7 +191,14 @@ class Field_Date extends Field_Base
         }
         $_arrAttributes = parent::_getAttributes($arrAttributes, $bFormDisabled);
 
-        $_arrAttributes['value'] = is_object($this->_mValue) ? FW_Date::obj_to_php($this->_mValue, 'd') : '';
+        $_arrAttributes['value'] = is_object($this->_mValue) ? FW_Date::obj_to_user($this->_mValue, $this->_sFormatKey) : '';
+        $_arrAttributes['placeholder'] = FW_Date::get_display_format($this->_sFormatKey);
+        $_arrAttributes['data-format'] = $_arrAttributes['placeholder'];
+
+        if ($this->_oMinValue)
+            $_arrAttributes['data-min'] = FW_Date::obj_to_user($this->_oMinValue, $this->_sFormatKey);
+        if ($this->_oMaxValue)
+            $_arrAttributes['data-max'] = FW_Date::obj_to_user($this->_oMaxValue, $this->_sFormatKey);
 
         return array_merge($_arrAttributes, $arrAttributes);
     }
